@@ -20,6 +20,10 @@ export default function App() {
     ]);
   };
 
+  const deleteBook = (id: string) => {
+    setBooks((prev) => prev.filter((book) => book.id !== id));
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -30,7 +34,7 @@ export default function App() {
         {books.length === 0 ? (
           <p className="empty">本がありません。</p>
         ) : (
-          <BookList books={books} />
+          <BookList books={books} deleteBook={deleteBook} />
         )}
       </main>
     </div>

@@ -183,6 +183,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .item-title { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
 .item-meta { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
 .item-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.list-item.is-vertical .item-actions { align-self: flex-end; margin-top: 4px; }
 
 .empty {
   text-align: center;
