@@ -12,9 +12,10 @@ const nextBookStatus = (currentStatus: BookStatus) => {
       return "read";
     case "read":
       return "unread";
-    default:
+    default: {
       const exhaustiveCheck: never = currentStatus;
       return exhaustiveCheck;
+    }
   }
 };
 
@@ -38,21 +39,14 @@ export default function App() {
     setBooks((prev) => prev.filter((book) => book.id !== id));
   };
 
-  const updateStatus = (id: string) => {
-    const target = books.filter((book) => book.id === id)[0];
-
-    if (!target) return;
-
-    const currentStatus = target.status;
-    const newStatus = nextBookStatus(currentStatus);
-
+  const advanceStatus = (id: string) => {
     setBooks((prev) =>
       prev.map((book) => {
         if (book.id !== id) return book;
 
         return {
           ...book,
-          status: newStatus,
+          status: nextBookStatus(book.status),
         };
       }),
     );
@@ -71,7 +65,7 @@ export default function App() {
           <BookList
             books={books}
             deleteBook={deleteBook}
-            updateStatus={updateStatus}
+            advanceStatus={advanceStatus}
           />
         )}
       </main>

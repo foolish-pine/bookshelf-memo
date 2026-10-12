@@ -4,11 +4,11 @@ import BookCard from "./BookCard";
 export default function BookList({
   books,
   deleteBook,
-  updateStatus,
+  advanceStatus,
 }: {
   books: Book[];
   deleteBook: (id: string) => void;
-  updateStatus: (id: string) => void;
+  advanceStatus: (id: string) => void;
 }) {
   return (
     <ul className="list">
@@ -17,7 +17,7 @@ export default function BookList({
           <BookCard
             book={book}
             deleteBook={deleteBook}
-            updateStatus={updateStatus}
+            advanceStatus={advanceStatus}
           />
         </li>
       ))}

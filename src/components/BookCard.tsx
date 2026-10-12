@@ -9,18 +9,18 @@ const bookStatusLabel = {
 export default function BookCard({
   book,
   deleteBook,
-  updateStatus,
+  advanceStatus,
 }: {
   book: Book;
   deleteBook: (id: string) => void;
-  updateStatus: (id: string) => void;
+  advanceStatus: (id: string) => void;
 }) {
   const handleDelete = () => {
     deleteBook(book.id);
   };
 
-  const handleUpdateStatus = () => {
-    updateStatus(book.id);
+  const handleAdvanceStatus = () => {
+    advanceStatus(book.id);
   };
 
   return (
@@ -29,7 +29,7 @@ export default function BookCard({
       <p className="item-meta">{book.author}</p>
       <p className="item-meta">
         ステータス:
-        <button type="button" className="badge" onClick={handleUpdateStatus}>
+        <button type="button" className="badge" onClick={handleAdvanceStatus}>
           {bookStatusLabel[book.status]}
         </button>
       </p>
