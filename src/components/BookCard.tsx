@@ -13,12 +13,8 @@ export default function BookCard({
   book: Book;
   deleteBook: (id: string) => void;
 }) {
-  const handleSubmit = (formData: FormData) => {
-    const id = formData.get("id");
-
-    if (typeof id !== "string") return;
-
-    deleteBook(id);
+  const handleDelete = () => {
+    deleteBook(book.id);
   };
 
   return (
@@ -29,10 +25,13 @@ export default function BookCard({
       <p className="item-meta">
         評価: {book.rating === null ? "未評価" : book.rating}
       </p>
-      <form action={handleSubmit} className="item-actions">
-        <input type="hidden" name="id" value={book.id} />
-        <button type="submit" className="btn btn-danger btn-sm">削除</button>
-      </form>
+      <button
+        type="button"
+        className="btn btn-danger btn-sm"
+        onClick={handleDelete}
+      >
+        削除
+      </button>
     </div>
   );
 }
