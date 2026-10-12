@@ -8,7 +8,7 @@ export default function App() {
   const [books, setBooks] = useState<Book[]>(dummyBooks);
 
   const addBook = ({ title, author }: { title: string; author: string }) => {
-    setBooks((books) => [
+    setBooks((prev) => [
       {
         id: crypto.randomUUID(),
         title,
@@ -16,7 +16,7 @@ export default function App() {
         status: "unread",
         rating: null,
       },
-      ...books,
+      ...prev,
     ]);
   };
 

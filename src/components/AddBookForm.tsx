@@ -4,8 +4,10 @@ export default function AddBookForm({
   addBook: ({ title, author }: { title: string; author: string }) => void;
 }) {
   const handleSubmit = (formData: FormData) => {
-    const title = formData.get("title") as string;
-    const author = formData.get("author") as string;
+    const title = formData.get("title");
+    const author = formData.get("author");
+
+    if (typeof title !== "string" || typeof author !== "string") return;
 
     if (title.trim() === "" || author.trim() === "") return;
 
@@ -25,7 +27,9 @@ export default function AddBookForm({
         著者
         <input className="input" type="text" name="author" required />
       </label>
-      <button type="submit" className="btn btn-primary">登録する</button>
+      <button type="submit" className="btn btn-primary">
+        登録する
+      </button>
     </form>
   );
 }
