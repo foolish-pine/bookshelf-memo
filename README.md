@@ -54,7 +54,7 @@ npm run dev
 | ボタン | `btn` + `btn-primary` `btn-secondary` `btn-ghost` `btn-danger`、小さく `btn-sm` |
 | タブ | `tabs` > `tab`、選択中 `is-active` |
 | 統計 | `stats` > `stat` > `stat-label` `stat-value`（`dl` / `dt` / `dd` 想定） |
-| リスト | `list` > `list-item`（読了時 `is-done`）> `item-body` > `item-title` `item-meta`、操作 `item-actions` |
+| リスト | `list` > `list-item`（読了時 `is-done`、中身を縦に並べる `is-vertical`）> `item-body` > `item-title` `item-meta`、操作 `item-actions` |
 | 空表示 | `empty` |
 | バッジ | `badge` + `badge-unread` `badge-reading` `badge-done` |
 | 星評価 | `stars` > `star`、塗り `is-filled` |
