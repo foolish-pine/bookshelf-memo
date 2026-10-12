@@ -1,27 +1,38 @@
-import type { Book } from "../types/Book";
+import type { Book, BookStatus } from "../types/Book";
 
 const bookStatusLabel = {
   unread: "未読",
   reading: "読書中",
   read: "読了",
-} as const satisfies Record<Book["status"], string>;
+} as const satisfies Record<BookStatus, string>;
 
 export default function BookCard({
   book,
   deleteBook,
+  updateStatus,
 }: {
   book: Book;
   deleteBook: (id: string) => void;
+  updateStatus: (id: string) => void;
 }) {
   const handleDelete = () => {
     deleteBook(book.id);
+  };
+
+  const handleUpdateStatus = () => {
+    updateStatus(book.id);
   };
 
   return (
     <div className="list-item is-vertical">
       <p className="item-title">{book.title}</p>
       <p className="item-meta">{book.author}</p>
-      <p className="item-meta">ステータス: {bookStatusLabel[book.status]}</p>
+      <p className="item-meta">
+        ステータス:
+        <button type="button" className="badge" onClick={handleUpdateStatus}>
+          {bookStatusLabel[book.status]}
+        </button>
+      </p>
       <p className="item-meta">
         評価: {book.rating === null ? "未評価" : book.rating}
       </p>

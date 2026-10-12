@@ -207,7 +207,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 button.badge { cursor: pointer; }
 .badge-unread { background: var(--bg); color: var(--text-muted); }
 .badge-reading { background: var(--warn-soft); color: var(--warn); }
-.badge-done { background: var(--accent-soft); color: var(--accent); }
+.badge-done,
+.badge-read { background: var(--accent-soft); color: var(--accent); }
+.item-meta .badge { margin-left: 6px; }
 
 /* ---------- 星評価 ---------- */
 .stars { display: inline-flex; gap: 2px; }
