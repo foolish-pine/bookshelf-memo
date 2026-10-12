@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { dummyBooks } from "./data/books";
-import type { Book, BookStatus } from "./types/Book";
+import type { Book, BookRatingNumber, BookStatus } from "./types/Book";
 import BookList from "./components/BookList";
 import AddBookForm from "./components/AddBookForm";
 
@@ -52,6 +52,19 @@ export default function App() {
     );
   };
 
+  const toggleRating = (id: string, newRating: BookRatingNumber) => {
+    setBooks((prev) =>
+      prev.map((book) => {
+        if (book.id !== id) return book;
+
+        return {
+          ...book,
+          rating: book.rating === newRating ? null : newRating,
+        };
+      }),
+    );
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -66,6 +79,7 @@ export default function App() {
             books={books}
             deleteBook={deleteBook}
             advanceStatus={advanceStatus}
+            toggleRating={toggleRating}
           />
         )}
       </main>

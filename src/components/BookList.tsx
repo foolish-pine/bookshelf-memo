@@ -1,14 +1,16 @@
-import type { Book } from "../types/Book";
+import type { Book, BookRatingNumber } from "../types/Book";
 import BookCard from "./BookCard";
 
 export default function BookList({
   books,
   deleteBook,
   advanceStatus,
+  toggleRating,
 }: {
   books: Book[];
   deleteBook: (id: string) => void;
   advanceStatus: (id: string) => void;
+  toggleRating: (id: string, newRating: BookRatingNumber) => void;
 }) {
   return (
     <ul className="list">
@@ -18,6 +20,7 @@ export default function BookList({
             book={book}
             deleteBook={deleteBook}
             advanceStatus={advanceStatus}
+            toggleRating={toggleRating}
           />
         </li>
       ))}

@@ -223,6 +223,8 @@ button.badge { cursor: pointer; }
   cursor: pointer;
 }
 .star.is-filled { color: var(--star); }
+.stars-glyph { align-items: center; }
+.stars-glyph .star { color: var(--star); }
 .star:hover { transform: scale(1.15); }
 
 /* ---------- メッセージ ---------- */

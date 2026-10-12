@@ -57,7 +57,7 @@ npm run dev
 | リスト | `list` > `list-item`（読了時 `is-done`、中身を縦に並べる `is-vertical`）> `item-body` > `item-title` `item-meta`、操作 `item-actions` |
 | 空表示 | `empty` |
 | バッジ | `badge` + `badge-unread` `badge-reading` `badge-read`（`badge-done` も同じ見た目） |
-| 星評価 | `stars` > `star`、塗り `is-filled` |
+| 星評価 | `stars` > `star`、塗り `is-filled`。★/☆ の文字で塗りを表すときは `stars` に `stars-glyph` を足す（全星が星色になる） |
 | メッセージ | `notice`、エラー `notice-error` |
 
 ### マークアップ例（構造のみ）

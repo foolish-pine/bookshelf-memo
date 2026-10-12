@@ -1,19 +1,25 @@
-import type { Book, BookStatus } from "../types/Book";
+import type { Book, BookRatingNumber, BookStatus } from "../types/Book";
 
-const bookStatusLabel = {
+const BOOK_STATUS_LABEL = {
   unread: "未読",
   reading: "読書中",
   read: "読了",
 } as const satisfies Record<BookStatus, string>;
 
+const BOOK_RATINGS = [
+  1, 2, 3, 4, 5,
+] as const satisfies readonly BookRatingNumber[];
+
 export default function BookCard({
   book,
   deleteBook,
   advanceStatus,
+  toggleRating,
 }: {
   book: Book;
   deleteBook: (id: string) => void;
   advanceStatus: (id: string) => void;
+  toggleRating: (id: string, newRating: BookRatingNumber) => void;
 }) {
   const handleDelete = () => {
     deleteBook(book.id);
@@ -23,6 +29,10 @@ export default function BookCard({
     advanceStatus(book.id);
   };
 
+  const handleToggleRating = (rating: BookRatingNumber) => {
+    toggleRating(book.id, rating);
+  };
+
   return (
     <div className="list-item is-vertical">
       <p className="item-title">{book.title}</p>
@@ -30,11 +40,21 @@ export default function BookCard({
       <p className="item-meta">
         ステータス:
         <button type="button" className="badge" onClick={handleAdvanceStatus}>
-          {bookStatusLabel[book.status]}
+          {BOOK_STATUS_LABEL[book.status]}
         </button>
       </p>
-      <p className="item-meta">
-        評価: {book.rating === null ? "未評価" : book.rating}
+      <p className="item-meta stars stars-glyph">
+        評価:{" "}
+        {BOOK_RATINGS.map((rating) => (
+          <button
+            key={rating}
+            type="button"
+            className="star"
+            onClick={() => handleToggleRating(rating)}
+          >
+            {book.rating !== null && book.rating >= rating ? "★" : "☆"}
+          </button>
+        ))}
       </p>
       <button
         type="button"
