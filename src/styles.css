@@ -88,6 +88,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 400;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .textarea { min-height: 80px; resize: vertical; }

@@ -1,7 +1,7 @@
 import type { Book } from "../types/Book";
 import BookCard from "./BookCard";
 
-export default function BookCards({ books }: { books: Book[] }) {
+export default function BookList({ books }: { books: Book[] }) {
   return (
     <ul className="list">
       {books.map(({ id, title, author, status, rating }) => (

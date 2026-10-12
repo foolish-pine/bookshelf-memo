@@ -1,10 +1,24 @@
 import { useState } from "react";
 import { dummyBooks } from "./data/books";
 import type { Book } from "./types/Book";
-import BookCards from "./components/BookCards";
+import BookList from "./components/BookList";
+import AddBookForm from "./components/AddBookForm";
 
 export default function App() {
-  const [books] = useState<Book[]>(dummyBooks);
+  const [books, setBooks] = useState<Book[]>(dummyBooks);
+
+  const addBook = ({ title, author }: { title: string; author: string }) => {
+    setBooks((books) => [
+      {
+        id: crypto.randomUUID(),
+        title,
+        author,
+        status: "unread",
+        rating: null,
+      },
+      ...books,
+    ]);
+  };
 
   return (
     <div className="app">
@@ -12,10 +26,11 @@ export default function App() {
         <h1 className="app-title">本棚メモ</h1>
       </header>
       <main className="app-main">
+        <AddBookForm addBook={addBook} />
         {books.length === 0 ? (
           <p className="empty">本がありません。</p>
         ) : (
-          <BookCards books={books} />
+          <BookList books={books} />
         )}
       </main>
     </div>
