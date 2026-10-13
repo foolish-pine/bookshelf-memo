@@ -30,3 +30,24 @@ export interface Book {
   status: BookStatus;
   rating: BookRatingNumber | null;
 }
+
+const isBookStatus = (value: unknown): value is BookStatus =>
+  (BOOK_STATUSES as readonly unknown[]).includes(value);
+
+const isBookRating = (value: unknown): value is BookRatingNumber =>
+  (BOOK_RATINGS as readonly unknown[]).includes(value);
+
+const isBook = (value: unknown): value is Book => {
+  if (typeof value !== "object" || value === null) return false;
+  const book = value as Record<string, unknown>;
+  return (
+    typeof book.id === "string" &&
+    typeof book.title === "string" &&
+    typeof book.author === "string" &&
+    isBookStatus(book.status) &&
+    (book.rating === null || isBookRating(book.rating))
+  );
+};
+
+export const isBooks = (value: unknown): value is Book[] =>
+  Array.isArray(value) && value.every(isBook);
