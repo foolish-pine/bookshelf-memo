@@ -20,6 +20,11 @@ export default function App() {
     statusFilter === "all"
       ? books
       : books.filter((book) => book.status === statusFilter);
+  const allBooksCount = books.length;
+  const readingBooksCount = books.filter(
+    (book) => book.status === "reading",
+  ).length;
+  const readBooksCount = books.filter((book) => book.status === "read").length;
 
   const addBook = ({ title, author }: { title: string; author: string }) => {
     setBooks((prev) => [
@@ -71,6 +76,10 @@ export default function App() {
       </header>
       <main className="app-main">
         <AddBookForm addBook={addBook} />
+        <p className="summary">
+          登録数: {allBooksCount} / 読書中: {readingBooksCount} / 読了:{" "}
+          {readBooksCount}
+        </p>
         <nav>
           <ul className="tabs">
             <li>
@@ -95,11 +104,6 @@ export default function App() {
             ))}
           </ul>
         </nav>
-        <p className="summary">
-          登録数: {books.length} / 読書中:{" "}
-          {books.filter((book) => book.status === "reading").length} / 読了:{" "}
-          {books.filter((book) => book.status === "read").length}
-        </p>
         {filteredBooks.length === 0 ? (
           <p className="empty">本がありません。</p>
         ) : (
