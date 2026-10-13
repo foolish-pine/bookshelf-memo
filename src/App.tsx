@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { dummyBooks } from "./data/books";
+import { useEffect, useState } from "react";
 import {
+  BOOK_RATINGS,
   BOOK_STATUS_LABEL,
   BOOK_STATUSES,
   nextBookStatus,
@@ -13,8 +13,45 @@ import AddBookForm from "./components/AddBookForm";
 
 type StatusFilter = BookStatus | "all";
 
+const STORAGE_KEY = "books";
+
+const isBookStatus = (value: unknown): value is BookStatus =>
+  (BOOK_STATUSES as readonly unknown[]).includes(value);
+
+const isBookRating = (value: unknown): value is BookRatingNumber =>
+  (BOOK_RATINGS as readonly unknown[]).includes(value);
+
+const isBook = (value: unknown): value is Book => {
+  if (typeof value !== "object" || value === null) return false;
+  const book = value as Record<string, unknown>;
+  return (
+    typeof book.id === "string" &&
+    typeof book.title === "string" &&
+    typeof book.author === "string" &&
+    isBookStatus(book.status) &&
+    (book.rating === null || isBookRating(book.rating))
+  );
+};
+
+const isBooks = (value: unknown): value is Book[] =>
+  Array.isArray(value) && value.every(isBook);
+
+const loadBooks = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) return [];
+
+    const parsed: unknown = JSON.parse(saved);
+
+    return isBooks(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 export default function App() {
-  const [books, setBooks] = useState<Book[]>(dummyBooks);
+  const [books, setBooks] = useState<Book[]>(loadBooks);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const filteredBooks =
     statusFilter === "all"
@@ -68,6 +105,10 @@ export default function App() {
       }),
     );
   };
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+  }, [books]);
 
   return (
     <div className="app">
