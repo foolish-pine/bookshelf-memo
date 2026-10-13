@@ -95,6 +95,11 @@ export default function App() {
             ))}
           </ul>
         </nav>
+        <p className="summary">
+          登録数: {books.length} / 読書中:{" "}
+          {books.filter((book) => book.status === "reading").length} / 読了:{" "}
+          {books.filter((book) => book.status === "read").length}
+        </p>
         {filteredBooks.length === 0 ? (
           <p className="empty">本がありません。</p>
         ) : (
