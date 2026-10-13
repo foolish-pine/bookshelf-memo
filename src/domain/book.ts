@@ -5,8 +5,25 @@ export const BOOK_STATUS_LABEL = {
   reading: "読書中",
   read: "読了",
 } as const satisfies Record<BookStatus, string>;
+export const nextBookStatus = (currentStatus: BookStatus) => {
+  switch (currentStatus) {
+    case "unread":
+      return "reading";
+    case "reading":
+      return "read";
+    case "read":
+      return "unread";
+    default: {
+      const exhaustiveCheck: never = currentStatus;
+      return exhaustiveCheck;
+    }
+  }
+};
 
 export type BookRatingNumber = 1 | 2 | 3 | 4 | 5;
+export const BOOK_RATINGS = [
+  1, 2, 3, 4, 5,
+] as const satisfies readonly BookRatingNumber[];
 
 export interface Book {
   id: string;

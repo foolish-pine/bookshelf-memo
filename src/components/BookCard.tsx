@@ -1,12 +1,9 @@
 import {
+  BOOK_RATINGS,
   BOOK_STATUS_LABEL,
   type Book,
   type BookRatingNumber,
 } from "../domain/book";
-
-const BOOK_RATINGS = [
-  1, 2, 3, 4, 5,
-] as const satisfies readonly BookRatingNumber[];
 
 export default function BookCard({
   book,

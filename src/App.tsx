@@ -3,6 +3,7 @@ import { dummyBooks } from "./data/books";
 import {
   BOOK_STATUS_LABEL,
   BOOK_STATUSES,
+  nextBookStatus,
   type Book,
   type BookRatingNumber,
   type BookStatus,
@@ -11,21 +12,6 @@ import BookList from "./components/BookList";
 import AddBookForm from "./components/AddBookForm";
 
 type StatusFilter = BookStatus | "all";
-
-const nextBookStatus = (currentStatus: BookStatus) => {
-  switch (currentStatus) {
-    case "unread":
-      return "reading";
-    case "reading":
-      return "read";
-    case "read":
-      return "unread";
-    default: {
-      const exhaustiveCheck: never = currentStatus;
-      return exhaustiveCheck;
-    }
-  }
-};
 
 export default function App() {
   const [books, setBooks] = useState<Book[]>(dummyBooks);
