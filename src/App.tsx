@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { dummyBooks } from "./data/books";
-import type { Book, BookRatingNumber, BookStatus } from "./types/Book";
+import {
+  BOOK_STATUS_LABEL,
+  BOOK_STATUSES,
+  type Book,
+  type BookRatingNumber,
+  type BookStatus,
+} from "./types/Book";
 import BookList from "./components/BookList";
 import AddBookForm from "./components/AddBookForm";
 
@@ -21,6 +27,13 @@ const nextBookStatus = (currentStatus: BookStatus) => {
 
 export default function App() {
   const [books, setBooks] = useState<Book[]>(dummyBooks);
+  const [selectedStatus, setSelectedStatus] = useState<BookStatus | "all">(
+    "all",
+  );
+  const filteredBooks =
+    selectedStatus === "all"
+      ? books
+      : books.filter((book) => book.status === selectedStatus);
 
   const addBook = ({ title, author }: { title: string; author: string }) => {
     setBooks((prev) => [
@@ -72,11 +85,35 @@ export default function App() {
       </header>
       <main className="app-main">
         <AddBookForm addBook={addBook} />
-        {books.length === 0 ? (
+        <nav>
+          <ul className="tabs">
+            <li>
+              <button
+                type="button"
+                className={selectedStatus === "all" ? "tab is-active" : "tab"}
+                onClick={() => setSelectedStatus("all")}
+              >
+                すべて
+              </button>
+            </li>
+            {BOOK_STATUSES.map((key) => (
+              <li key={key}>
+                <button
+                  type="button"
+                  className={selectedStatus === key ? "tab is-active" : "tab"}
+                  onClick={() => setSelectedStatus(key)}
+                >
+                  {BOOK_STATUS_LABEL[key]}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        {filteredBooks.length === 0 ? (
           <p className="empty">本がありません。</p>
         ) : (
           <BookList
-            books={books}
+            books={filteredBooks}
             deleteBook={deleteBook}
             advanceStatus={advanceStatus}
             toggleRating={toggleRating}

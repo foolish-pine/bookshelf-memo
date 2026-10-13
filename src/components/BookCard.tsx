@@ -1,10 +1,8 @@
-import type { Book, BookRatingNumber, BookStatus } from "../types/Book";
-
-const BOOK_STATUS_LABEL = {
-  unread: "未読",
-  reading: "読書中",
-  read: "読了",
-} as const satisfies Record<BookStatus, string>;
+import {
+  BOOK_STATUS_LABEL,
+  type Book,
+  type BookRatingNumber,
+} from "../types/Book";
 
 const BOOK_RATINGS = [
   1, 2, 3, 4, 5,
