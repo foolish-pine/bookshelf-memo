@@ -1,4 +1,4 @@
-import type { Book, BookRatingNumber } from "../types/Book";
+import type { Book, BookRatingNumber } from "../domain/book";
 import BookCard from "./BookCard";
 
 export default function BookList({

@@ -2,7 +2,7 @@ import {
   BOOK_STATUS_LABEL,
   type Book,
   type BookRatingNumber,
-} from "../types/Book";
+} from "../domain/book";
 
 const BOOK_RATINGS = [
   1, 2, 3, 4, 5,

@@ -6,9 +6,11 @@ import {
   type Book,
   type BookRatingNumber,
   type BookStatus,
-} from "./types/Book";
+} from "./domain/book";
 import BookList from "./components/BookList";
 import AddBookForm from "./components/AddBookForm";
+
+type StatusFilter = BookStatus | "all";
 
 const nextBookStatus = (currentStatus: BookStatus) => {
   switch (currentStatus) {
@@ -27,13 +29,11 @@ const nextBookStatus = (currentStatus: BookStatus) => {
 
 export default function App() {
   const [books, setBooks] = useState<Book[]>(dummyBooks);
-  const [selectedStatus, setSelectedStatus] = useState<BookStatus | "all">(
-    "all",
-  );
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const filteredBooks =
-    selectedStatus === "all"
+    statusFilter === "all"
       ? books
-      : books.filter((book) => book.status === selectedStatus);
+      : books.filter((book) => book.status === statusFilter);
 
   const addBook = ({ title, author }: { title: string; author: string }) => {
     setBooks((prev) => [
@@ -90,8 +90,8 @@ export default function App() {
             <li>
               <button
                 type="button"
-                className={selectedStatus === "all" ? "tab is-active" : "tab"}
-                onClick={() => setSelectedStatus("all")}
+                className={statusFilter === "all" ? "tab is-active" : "tab"}
+                onClick={() => setStatusFilter("all")}
               >
                 すべて
               </button>
@@ -100,8 +100,8 @@ export default function App() {
               <li key={key}>
                 <button
                   type="button"
-                  className={selectedStatus === key ? "tab is-active" : "tab"}
-                  onClick={() => setSelectedStatus(key)}
+                  className={statusFilter === key ? "tab is-active" : "tab"}
+                  onClick={() => setStatusFilter(key)}
                 >
                   {BOOK_STATUS_LABEL[key]}
                 </button>
