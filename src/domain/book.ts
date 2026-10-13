@@ -20,10 +20,8 @@ export const nextBookStatus = (currentStatus: BookStatus) => {
   }
 };
 
-export type BookRatingNumber = 1 | 2 | 3 | 4 | 5;
-export const BOOK_RATINGS = [
-  1, 2, 3, 4, 5,
-] as const satisfies readonly BookRatingNumber[];
+export const BOOK_RATINGS = [1, 2, 3, 4, 5] as const;
+export type BookRatingNumber = (typeof BOOK_RATINGS)[number];
 
 export interface Book {
   id: string;
