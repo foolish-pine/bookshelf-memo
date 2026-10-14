@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import AddBookForm from "./components/AddBookForm";
 import BookList from "./components/BookList";
 import {
@@ -10,14 +10,79 @@ import {
   isBooks,
   nextBookStatus,
 } from "./domain/book";
-import { useLocalStorage } from "./hooks/useLocalStorage";
+import { useSaveToLocalStorage } from "./hooks/useSaveToLocalStorage";
+import { loadFromLocalStorage } from "./utils/loadFromLocalStorage";
 
 type StatusFilter = BookStatus | "all";
 
 const STORAGE_KEY = "books";
 
+type Action =
+  | {
+      type: "add_book";
+      id: string;
+      title: string;
+      author: string;
+    }
+  | {
+      type: "delete_book";
+      id: string;
+    }
+  | {
+      type: "advance_book_status";
+      id: string;
+    }
+  | {
+      type: "toggle_book_rating";
+      id: string;
+      newRating: BookRatingNumber;
+    };
+
+function reducer(state: Book[], action: Action): Book[] {
+  const type = action.type;
+  switch (type) {
+    case "add_book":
+      return [
+        {
+          id: action.id,
+          title: action.title,
+          author: action.author,
+          status: "unread",
+          rating: null,
+        },
+        ...state,
+      ];
+    case "delete_book":
+      return state.filter((book) => book.id !== action.id);
+    case "advance_book_status":
+      return state.map((book) => {
+        if (book.id !== action.id) return book;
+
+        return {
+          ...book,
+          status: nextBookStatus(book.status),
+        };
+      });
+    case "toggle_book_rating":
+      return state.map((book) => {
+        if (book.id !== action.id) return book;
+
+        return {
+          ...book,
+          rating: book.rating === action.newRating ? null : action.newRating,
+        };
+      });
+    default:
+      throw new Error(type satisfies never);
+  }
+}
+
 export default function App() {
-  const [books, setBooks] = useLocalStorage<Book[]>(STORAGE_KEY, [], isBooks);
+  const [books, dispatch] = useReducer(reducer, [], () =>
+    loadFromLocalStorage(STORAGE_KEY, [], isBooks),
+  );
+  useSaveToLocalStorage(STORAGE_KEY, books);
+
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const filteredBooks =
     statusFilter === "all"
@@ -30,46 +95,19 @@ export default function App() {
   const readBooksCount = books.filter((book) => book.status === "read").length;
 
   const addBook = ({ title, author }: { title: string; author: string }) => {
-    setBooks((prev) => [
-      {
-        id: crypto.randomUUID(),
-        title,
-        author,
-        status: "unread",
-        rating: null,
-      },
-      ...prev,
-    ]);
+    dispatch({ type: "add_book", id: crypto.randomUUID(), title, author });
   };
 
   const deleteBook = (id: string) => {
-    setBooks((prev) => prev.filter((book) => book.id !== id));
+    dispatch({ type: "delete_book", id });
   };
 
   const advanceStatus = (id: string) => {
-    setBooks((prev) =>
-      prev.map((book) => {
-        if (book.id !== id) return book;
-
-        return {
-          ...book,
-          status: nextBookStatus(book.status),
-        };
-      }),
-    );
+    dispatch({ type: "advance_book_status", id });
   };
 
   const toggleRating = (id: string, newRating: BookRatingNumber) => {
-    setBooks((prev) =>
-      prev.map((book) => {
-        if (book.id !== id) return book;
-
-        return {
-          ...book,
-          rating: book.rating === newRating ? null : newRating,
-        };
-      }),
-    );
+    dispatch({ type: "toggle_book_rating", id, newRating });
   };
 
   return (
