@@ -25,6 +25,12 @@ type Action =
       author: string;
     }
   | {
+      type: "edit_book";
+      id: string;
+      title: string;
+      author: string;
+    }
+  | {
       type: "delete_book";
       id: string;
     }
@@ -52,6 +58,16 @@ function reducer(state: Book[], action: Action): Book[] {
         },
         ...state,
       ];
+    case "edit_book":
+      return state.map((book) => {
+        if (book.id !== action.id) return book;
+
+        return {
+          ...book,
+          title: action.title,
+          author: action.author,
+        };
+      });
     case "delete_book":
       return state.filter((book) => book.id !== action.id);
     case "advance_book_status":
@@ -102,6 +118,18 @@ export default function App() {
     dispatch({ type: "delete_book", id });
   };
 
+  const editBook = ({
+    id,
+    title,
+    author,
+  }: {
+    id: string;
+    title: string;
+    author: string;
+  }) => {
+    dispatch({ type: "edit_book", id, title, author });
+  };
+
   const advanceStatus = (id: string) => {
     dispatch({ type: "advance_book_status", id });
   };
@@ -150,6 +178,7 @@ export default function App() {
         ) : (
           <BookList
             books={filteredBooks}
+            editBook={editBook}
             deleteBook={deleteBook}
             advanceStatus={advanceStatus}
             toggleRating={toggleRating}
