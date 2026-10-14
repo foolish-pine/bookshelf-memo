@@ -1,6 +1,7 @@
 import { useReducer, useState } from "react";
 import AddBookForm from "./components/AddBookForm";
 import BookList from "./components/BookList";
+import BookSearch from "./components/BookSearch";
 import {
   BOOK_STATUS_LABEL,
   BOOK_STATUSES,
@@ -191,6 +192,7 @@ export default function App() {
       </header>
       <main className="app-main">
         <AddBookForm addBook={addBook} />
+        <BookSearch addBook={addBook} />
         <p className="summary">
           登録数: {allBooksCount} / 読書中: {readingBooksCount} / 読了:{" "}
           {readBooksCount}
