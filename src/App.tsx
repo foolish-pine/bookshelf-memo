@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   BOOK_STATUS_LABEL,
   BOOK_STATUSES,
@@ -10,27 +10,14 @@ import {
 } from "./domain/book";
 import BookList from "./components/BookList";
 import AddBookForm from "./components/AddBookForm";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 type StatusFilter = BookStatus | "all";
 
 const STORAGE_KEY = "books";
 
-const loadBooks = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-
-    if (!saved) return [];
-
-    const parsed: unknown = JSON.parse(saved);
-
-    return isBooks(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
 export default function App() {
-  const [books, setBooks] = useState<Book[]>(loadBooks);
+  const [books, setBooks] = useLocalStorage<Book[]>(STORAGE_KEY, [], isBooks);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const filteredBooks =
     statusFilter === "all"
@@ -84,10 +71,6 @@ export default function App() {
       }),
     );
   };
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
-  }, [books]);
 
   return (
     <div className="app">
