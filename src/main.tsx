@@ -5,7 +5,7 @@ import "./styles.css";
 
 const rootElement = document.getElementById("root");
 
-if (!rootElement) throw new Error("Can not find root element.");
+if (!rootElement) throw new Error("Cannot find root element.");
 
 createRoot(rootElement).render(
   <StrictMode>
