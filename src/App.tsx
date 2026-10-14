@@ -1,15 +1,15 @@
 import { useState } from "react";
+import AddBookForm from "./components/AddBookForm";
+import BookList from "./components/BookList";
 import {
   BOOK_STATUS_LABEL,
   BOOK_STATUSES,
-  isBooks,
-  nextBookStatus,
   type Book,
   type BookRatingNumber,
   type BookStatus,
+  isBooks,
+  nextBookStatus,
 } from "./domain/book";
-import BookList from "./components/BookList";
-import AddBookForm from "./components/AddBookForm";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
 type StatusFilter = BookStatus | "all";

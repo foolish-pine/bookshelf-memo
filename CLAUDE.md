@@ -96,6 +96,7 @@ Claude はステップ完了時にここを更新する。
 
 - React 19 / TypeScript（strict）/ Vite
 - 状態管理ライブラリ・UIライブラリは入れない（素の React で練習する）
+- Linter / Formatter は Biome（`biome.json`）。ESLint / Prettier / Stylelint は使わない
 
 ## コマンド
 
@@ -103,6 +104,8 @@ Claude はステップ完了時にここを更新する。
 npm install        # 初回のみ
 npm run dev        # 開発サーバー起動
 npm run typecheck  # 型チェック
+npm run check      # Biome（lint + format + import整理）のチェック
+npm run check:fix  # 上記を自動修正
 npm run build      # 型チェック + ビルド
 ```
 
