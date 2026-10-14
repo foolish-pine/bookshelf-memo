@@ -13,6 +13,16 @@ import {
 import { useSaveToLocalStorage } from "./hooks/useSaveToLocalStorage";
 import { loadFromLocalStorage } from "./utils/loadFromLocalStorage";
 
+const BOOK_LIST_ORDER = ["addedAt", "rating", "title"] as const;
+type BookListOrder = (typeof BOOK_LIST_ORDER)[number];
+const isOrder = (value: unknown): value is BookListOrder =>
+  (BOOK_LIST_ORDER as readonly unknown[]).includes(value);
+const BOOK_LIST_ORDER_LABEL = {
+  addedAt: "追加順",
+  rating: "評価順",
+  title: "タイトル順",
+} as const satisfies Record<BookListOrder, string>;
+
 type StatusFilter = BookStatus | "all";
 
 const STORAGE_KEY = "books";
@@ -110,6 +120,9 @@ export default function App() {
   ).length;
   const readBooksCount = books.filter((book) => book.status === "read").length;
 
+  const [order, setOrder] = useState<BookListOrder>("addedAt");
+  const [searchText, setSearchText] = useState("");
+
   const addBook = ({ title, author }: { title: string; author: string }) => {
     dispatch({ type: "add_book", id: crypto.randomUUID(), title, author });
   };
@@ -137,6 +150,39 @@ export default function App() {
   const toggleRating = (id: string, newRating: BookRatingNumber) => {
     dispatch({ type: "toggle_book_rating", id, newRating });
   };
+
+  const searchedBooks = filteredBooks.filter((book) =>
+    book.title.toLowerCase().includes(searchText.toLowerCase()),
+  );
+
+  const selectOrder = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+
+    if (!isOrder(value)) return;
+
+    setOrder(value);
+  };
+
+  const sortBooks = () => {
+    switch (order) {
+      case "addedAt":
+        return searchedBooks;
+      case "rating":
+        return [...searchedBooks].sort((a, b) => {
+          if (a.rating === null && b.rating === null) return 0;
+          if (a.rating === null) return 1;
+          if (b.rating === null) return -1;
+          return b.rating - a.rating;
+        });
+      case "title":
+        return [...searchedBooks].sort((a, b) =>
+          a.title.localeCompare(b.title, "ja"),
+        );
+      default:
+        throw new Error(order satisfies never);
+    }
+  };
+  const sortedBooks = sortBooks();
 
   return (
     <div className="app">
@@ -173,11 +219,39 @@ export default function App() {
             ))}
           </ul>
         </nav>
-        {filteredBooks.length === 0 ? (
+        <label className="field field-label">
+          並び順
+          <select
+            className="select"
+            name="order"
+            value={order}
+            onChange={selectOrder}
+          >
+            {BOOK_LIST_ORDER.map((key) => (
+              <option value={key} key={key}>
+                {BOOK_LIST_ORDER_LABEL[key]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="field field-label">
+          タイトルで検索
+          <input
+            className="input"
+            type="text"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+        </label>
+        {filteredBooks.length === 0 && (
           <p className="empty">本がありません。</p>
-        ) : (
+        )}
+        {filteredBooks.length !== 0 && searchedBooks.length === 0 && (
+          <p className="empty">検索ワードを含む本はありません。</p>
+        )}
+        {filteredBooks.length !== 0 && searchedBooks.length !== 0 && (
           <BookList
-            books={filteredBooks}
+            books={sortedBooks}
             editBook={editBook}
             deleteBook={deleteBook}
             advanceStatus={advanceStatus}

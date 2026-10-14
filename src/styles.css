@@ -126,6 +126,10 @@ textarea {
   flex: 1 1 180px;
   min-width: 0;
 }
+/* app-main（縦並び）の直下では flex-basis が高さになるので打ち消す */
+.app-main > .field {
+  flex: none;
+}
 .field-label {
   font-size: 0.8rem;
   font-weight: 600;
