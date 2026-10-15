@@ -5,12 +5,11 @@ import BookSearch from "./components/BookSearch";
 import {
   BOOK_STATUS_LABEL,
   BOOK_STATUSES,
-  type Book,
   type BookRatingNumber,
   type BookStatus,
   isBooks,
-  nextBookStatus,
 } from "./domain/book";
+import { bookReducer } from "./domain/bookReducer";
 import { useSaveToLocalStorage } from "./hooks/useSaveToLocalStorage";
 import { loadFromLocalStorage } from "./utils/loadFromLocalStorage";
 
@@ -28,84 +27,8 @@ type StatusFilter = BookStatus | "all";
 
 const STORAGE_KEY = "books";
 
-type Action =
-  | {
-      type: "add_book";
-      id: string;
-      title: string;
-      author: string;
-    }
-  | {
-      type: "edit_book";
-      id: string;
-      title: string;
-      author: string;
-    }
-  | {
-      type: "delete_book";
-      id: string;
-    }
-  | {
-      type: "advance_book_status";
-      id: string;
-    }
-  | {
-      type: "toggle_book_rating";
-      id: string;
-      newRating: BookRatingNumber;
-    };
-
-function reducer(state: Book[], action: Action): Book[] {
-  const type = action.type;
-  switch (type) {
-    case "add_book":
-      return [
-        {
-          id: action.id,
-          title: action.title,
-          author: action.author,
-          status: "unread",
-          rating: null,
-        },
-        ...state,
-      ];
-    case "edit_book":
-      return state.map((book) => {
-        if (book.id !== action.id) return book;
-
-        return {
-          ...book,
-          title: action.title,
-          author: action.author,
-        };
-      });
-    case "delete_book":
-      return state.filter((book) => book.id !== action.id);
-    case "advance_book_status":
-      return state.map((book) => {
-        if (book.id !== action.id) return book;
-
-        return {
-          ...book,
-          status: nextBookStatus(book.status),
-        };
-      });
-    case "toggle_book_rating":
-      return state.map((book) => {
-        if (book.id !== action.id) return book;
-
-        return {
-          ...book,
-          rating: book.rating === action.newRating ? null : action.newRating,
-        };
-      });
-    default:
-      throw new Error(type satisfies never);
-  }
-}
-
 export default function App() {
-  const [books, dispatch] = useReducer(reducer, [], () =>
+  const [books, dispatch] = useReducer(bookReducer, [], () =>
     loadFromLocalStorage(STORAGE_KEY, [], isBooks),
   );
   useSaveToLocalStorage(STORAGE_KEY, books);
