@@ -20,9 +20,7 @@ afterEach(() => {
 
 describe("loadFromLocalStorage", () => {
   it("対象のキーで何も保存されていないとき、初期値を返す", () => {
-    expect(loadFromLocalStorage("not-existing-key", [], isBooks)).toStrictEqual(
-      [],
-    );
+    expect(loadFromLocalStorage(STORAGE_KEY, [], isBooks)).toStrictEqual([]);
   });
 
   it("保存されている文字列が JSON にパースできない値のとき、初期値を返す", () => {
