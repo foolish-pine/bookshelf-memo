@@ -65,7 +65,7 @@ Claude はステップ完了時にここを更新する。
 - [x] **Step 15: 外部APIから取得** — Open Library Search API で書誌情報を検索して追加（ローディング・エラー表示）。Google Books API は利用制限が面倒なため変更（2026-10-14 完了。入力ごとのデバウンス検索、AbortController で競合対策、検索状態は判別可能なユニオン型）
 - [ ] **Step 16: テストを書く** — Vitest + React Testing Library を導入し、reducer・ドメイン関数・コンポーネントのテストを書く
   - [x] **16-1: 環境構築** — Vitest / React Testing Library / jsdom を導入し、`npm test` で実行できるようにする（2026-10-15 完了。DOM 環境は happy-dom、globals: true）
-  - [ ] **16-2: ドメイン関数** — `nextBookStatus` と `isBooks` のテスト
+  - [x] **16-2: ドメイン関数** — `nextBookStatus` と `isBooks` のテスト（2026-10-15 完了。非公開の isBook 等は isBooks 経由でテスト）
   - [ ] **16-3: reducer** — 全アクションのテスト。元の state が変わらないことも確認する
   - [ ] **16-4: localStorage の読み込み** — データなし・壊れた JSON・形が違うデータで初期値が返るテスト。テスト間の後片付け
   - [ ] **16-5: コンポーネント** — ユーザー操作を起点にした振る舞いのテストを2つ以上
