@@ -179,13 +179,13 @@ describe("bookReducer", () => {
     });
 
     it("対象の id を持つ本が未評価のとき、新しい評価に変更する", () => {
-      const prevState = freezeState([
+      const prevStateWithUnratedBook = freezeState([
         { ...validBook, rating: null },
         { ...anotherValidBook },
       ]);
       const targetId = validBook.id;
 
-      const nextState = bookReducer(prevState, {
+      const nextState = bookReducer(prevStateWithUnratedBook, {
         type: "toggle_book_rating",
         id: targetId,
         newRating: 3,
