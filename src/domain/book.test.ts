@@ -76,7 +76,7 @@ describe("isBooks", () => {
       value: "unknown",
       label: "unread、reading、readのいずれでもない",
     },
-    { key: "rating", value: "3", label: "数字でない" },
+    { key: "rating", value: "3", label: "数値でない" },
   ])("$key が $label とき、false を返す", ({ key, value }) => {
     expect(isBooks([{ ...validValue, [key]: value }])).toBe(false);
   });
