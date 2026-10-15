@@ -67,7 +67,7 @@ Claude はステップ完了時にここを更新する。
   - [x] **16-1: 環境構築** — Vitest / React Testing Library / jsdom を導入し、`npm test` で実行できるようにする（2026-10-15 完了。DOM 環境は happy-dom、globals: true）
   - [x] **16-2: ドメイン関数** — `nextBookStatus` と `isBooks` のテスト（2026-10-15 完了。非公開の isBook 等は isBooks 経由でテスト）
   - [x] **16-3: reducer** — 全アクションのテスト。元の state が変わらないことも確認する（2026-10-15 完了。reducer を src/domain/bookReducer.ts に切り出し、freezeState で元の state の不変を確認）
-  - [ ] **16-4: localStorage の読み込み** — データなし・壊れた JSON・形が違うデータで初期値が返るテスト。テスト間の後片付け
+  - [x] **16-4: localStorage の読み込み** — データなし・壊れた JSON・形が違うデータで初期値が返るテスト。テスト間の後片付け（2026-10-15 完了。getItem の例外は vi.stubGlobal で localStorage ごと差し替え、afterEach で戻してから clear）
   - [ ] **16-5: コンポーネント** — ユーザー操作を起点にした振る舞いのテストを2つ以上
   - [ ] **16-6: BookSearch（任意）** — `fetch` をモックし、成功・0件・エラーの表示をテストする
 - [ ] **Step 17: Context で props の受け渡しをなくす** — reducer と Context を組み合わせ、操作関数の props バケツリレーを解消する。Step 16 のテストが通ることを確認する
