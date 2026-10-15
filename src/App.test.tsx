@@ -4,7 +4,5 @@ import App from "./App.tsx";
 test("アプリ名が表示される", () => {
   render(<App />);
 
-  expect(screen.getByRole("heading", { name: "本棚メモ" })).toHaveTextContent(
-    "本棚メモ",
-  );
+  expect(screen.getByRole("heading", { name: "本棚メモ" })).toBeInTheDocument();
 });
