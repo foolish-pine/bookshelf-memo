@@ -18,7 +18,7 @@ export default function AddBookForm({
   };
 
   return (
-    <form action={handleSubmit} className="form card">
+    <form action={handleSubmit} className="form">
       <label className="field field-label">
         タイトル
         <input className="input" type="text" name="title" required />

@@ -51,7 +51,10 @@ npm run dev
 | 全体レイアウト | `app` `app-header` `app-title` `app-subtitle` `app-main` |
 | 汎用 | `card` `row` `stack` `spacer` `text-muted` |
 | 見出し付きの区画 | `section` > `section-title`（`section` 要素 + `h2` 想定。中身は 12px 間隔で縦に並ぶ） |
-| フォーム | `form` `field` `field-label` `field-error` `input` `select` `textarea` / エラー時 `is-invalid` |
+| 区画の見出し行 | `section-header`（`section-title` と補足テキストを横に並べる） |
+| 小区画 | `subsection` > `subsection-title`（`h3` 想定。2つ目以降は上に区切り線） |
+| 操作バー | `toolbar`（絞り込み・検索・並び順をまとめる。`card` と併用） |
+| フォーム | `form` `field` `field-label` `field-error` `input` `select` `textarea` / エラー時 `is-invalid` / 横並びで幅を抑える `field-narrow` |
 | ボタン | `btn` + `btn-primary` `btn-secondary` `btn-ghost` `btn-danger`、小さく `btn-sm` |
 | タブ | `tabs` > `tab`、選択中 `is-active`（`ul.tabs` > `li` > `button.tab` でも可） |
 | 統計 | `stats` > `stat` > `stat-label` `stat-value`（`dl` / `dt` / `dd` 想定） |

@@ -124,6 +124,37 @@ textarea {
   font-weight: 700;
   letter-spacing: 0.02em;
 }
+/* 見出しと補足（件数など）を横に並べる */
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+}
+/* 区画の中の小区画。2つ目以降は区切り線を入れる */
+.subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.subsection + .subsection {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.subsection-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+/* 絞り込み・検索・並び順の操作をまとめる */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
 
 /* ---------- フォーム ---------- */
 .form {
@@ -140,8 +171,13 @@ textarea {
   min-width: 0;
 }
 /* app-main（縦並び）の直下では flex-basis が高さになるので打ち消す */
-.app-main > .field {
+.app-main > .field,
+.subsection > .field {
   flex: none;
+}
+/* 横並びの中で幅を取りすぎない項目（並び順のセレクトなど） */
+.field-narrow {
+  flex: 0 1 160px;
 }
 .field-label {
   font-size: 0.8rem;
@@ -324,6 +360,11 @@ textarea {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+}
+/* カードの中に並ぶ一覧（検索結果など）は、背景を一段沈める */
+.card .list-item {
+  background: var(--bg);
+  box-shadow: none;
 }
 .list-item.is-vertical {
   flex-direction: column;

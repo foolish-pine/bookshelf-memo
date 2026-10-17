@@ -113,62 +113,77 @@ export default function App() {
         <h1 className="app-title">本棚メモ</h1>
       </header>
       <main className="app-main">
-        <AddBookForm addBook={addBook} />
-        <BookSearch addBook={addBook} />
-        <p className="summary">
-          登録数: {allBooksCount} / 読書中: {readingBooksCount} / 読了:{" "}
-          {readBooksCount}
-        </p>
-        <nav>
-          <ul className="tabs">
-            <li>
-              <button
-                type="button"
-                className={statusFilter === "all" ? "tab is-active" : "tab"}
-                onClick={() => setStatusFilter("all")}
-              >
-                すべて
-              </button>
-            </li>
-            {BOOK_STATUSES.map((key) => (
-              <li key={key}>
+        <section className="section card">
+          <h2 className="section-title">本を追加</h2>
+          <div className="subsection">
+            <h3 className="subsection-title">手入力で追加</h3>
+            <AddBookForm addBook={addBook} />
+          </div>
+          <div className="subsection">
+            <h3 className="subsection-title">Open Library で探して追加</h3>
+            <BookSearch addBook={addBook} />
+          </div>
+        </section>
+        <div className="toolbar card">
+          <nav>
+            <ul className="tabs">
+              <li>
                 <button
                   type="button"
-                  className={statusFilter === key ? "tab is-active" : "tab"}
-                  onClick={() => setStatusFilter(key)}
+                  className={statusFilter === "all" ? "tab is-active" : "tab"}
+                  onClick={() => setStatusFilter("all")}
                 >
-                  {BOOK_STATUS_LABEL[key]}
+                  すべて
                 </button>
               </li>
-            ))}
-          </ul>
-        </nav>
-        <label className="field field-label">
-          並び順
-          <select
-            className="select"
-            name="order"
-            value={order}
-            onChange={selectOrder}
-          >
-            {BOOK_LIST_ORDER.map((key) => (
-              <option value={key} key={key}>
-                {BOOK_LIST_ORDER_LABEL[key]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field field-label">
-          タイトルで検索
-          <input
-            className="input"
-            type="text"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-        </label>
+              {BOOK_STATUSES.map((key) => (
+                <li key={key}>
+                  <button
+                    type="button"
+                    className={statusFilter === key ? "tab is-active" : "tab"}
+                    onClick={() => setStatusFilter(key)}
+                  >
+                    {BOOK_STATUS_LABEL[key]}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="row">
+            <label className="field field-label">
+              タイトルで検索
+              <input
+                className="input"
+                type="text"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+            </label>
+            <label className="field field-label field-narrow">
+              並び順
+              <select
+                className="select"
+                name="order"
+                value={order}
+                onChange={selectOrder}
+              >
+                {BOOK_LIST_ORDER.map((key) => (
+                  <option value={key} key={key}>
+                    {BOOK_LIST_ORDER_LABEL[key]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
         <section className="section">
-          <h2 className="section-title">本一覧</h2>
+          <div className="section-header">
+            <h2 className="section-title">本一覧</h2>
+            <p className="summary">
+              登録数: {allBooksCount} / 読書中: {readingBooksCount} / 読了:{" "}
+              {readBooksCount}
+            </p>
+          </div>
           {filteredBooks.length === 0 && (
             <p className="empty">本がありません。</p>
           )}
