@@ -12,6 +12,16 @@ const getBookListSection = () => {
   return bookListSection;
 };
 
+const getTargetBook = (bookListSection: HTMLElement, bookTitle: string) => {
+  const targetBook = within(bookListSection)
+    .getAllByRole("listitem")
+    .find((li) => within(li).queryByText(bookTitle));
+
+  if (!targetBook) throw new Error("targetBook does not exist.");
+
+  return targetBook;
+};
+
 const addBook = async (user: UserEvent) => {
   const randomId = crypto.randomUUID();
   const title = `タイトル-${randomId}`;
@@ -71,15 +81,46 @@ describe("App", () => {
     const { title: targetTitle } = await addBook(user);
 
     const bookListSection = getBookListSection();
-    const targetBook = within(bookListSection)
-      .getAllByRole("listitem")
-      .find((li) => within(li).queryByText(targetTitle));
-
-    if (!targetBook) throw new Error("targetBook does not exist.");
+    const targetBook = getTargetBook(bookListSection, targetTitle);
 
     await user.click(within(targetBook).getByRole("button", { name: "削除" }));
 
     expect(targetBook).not.toBeInTheDocument();
+    expect(within(bookListSection).getByText(title)).toBeInTheDocument();
+    expect(within(bookListSection).getByText(author)).toBeInTheDocument();
+  });
+
+  it("本のタイトルと著者を編集できる", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const { title, author } = await addBook(user);
+    const { title: targetTitle, author: targetAuthor } = await addBook(user);
+
+    const bookListSection = getBookListSection();
+    const targetBook = getTargetBook(bookListSection, targetTitle);
+
+    await user.click(within(targetBook).getByRole("button", { name: "編集" }));
+
+    const newTitle = "新しいタイトル";
+    const titleInput = within(targetBook).getByLabelText("タイトル");
+    const newAuthor = "新しい著者";
+    const authorInput = within(targetBook).getByLabelText("著者");
+
+    await user.clear(titleInput);
+    await user.type(titleInput, newTitle);
+    await user.clear(authorInput);
+    await user.type(authorInput, newAuthor);
+    await user.click(within(targetBook).getByRole("button", { name: "保存" }));
+
+    expect(
+      within(bookListSection).queryByText(targetTitle),
+    ).not.toBeInTheDocument();
+    expect(
+      within(bookListSection).queryByText(targetAuthor),
+    ).not.toBeInTheDocument();
+    expect(within(bookListSection).getByText(newTitle)).toBeInTheDocument();
+    expect(within(bookListSection).getByText(newAuthor)).toBeInTheDocument();
     expect(within(bookListSection).getByText(title)).toBeInTheDocument();
     expect(within(bookListSection).getByText(author)).toBeInTheDocument();
   });
