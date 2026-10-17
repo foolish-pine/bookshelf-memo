@@ -1,7 +1,11 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App.tsx";
-import type { Book } from "./domain/book.ts";
+import {
+  BOOK_STATUS_LABEL,
+  type Book,
+  type BookStatus,
+} from "./domain/book.ts";
 import { LOCAL_STORAGE_BOOKS_KEY } from "./storage.ts";
 
 const createBook = ({
@@ -35,6 +39,8 @@ const getBookListSectionElement = () => {
 
   return bookListSectionElement;
 };
+
+const getNavElement = () => screen.getByRole("navigation");
 
 const getTargetBookElement = (
   bookListSection: HTMLElement,
@@ -284,7 +290,7 @@ describe("App", () => {
     });
   });
 
-  it("登録している本、読書中の本、読了済みの本の数を表示する", async () => {
+  it("登録している本、読書中の本、読了済みの本の数を表示する", () => {
     setupBooksInLocalStorage([
       createBook({ status: "unread" }),
       createBook({ status: "unread" }),
@@ -301,5 +307,79 @@ describe("App", () => {
     expect(
       screen.getByText("登録数: 9 / 読書中: 3 / 読了: 4"),
     ).toBeInTheDocument();
+  });
+
+  describe("ステータスによる絞り込み機能", () => {
+    beforeEach(() => {
+      setupBooksInLocalStorage([
+        createBook({ status: "unread" }),
+        createBook({ status: "unread" }),
+        createBook({ status: "reading" }),
+        createBook({ status: "reading" }),
+        createBook({ status: "reading" }),
+        createBook({ status: "read" }),
+        createBook({ status: "read" }),
+        createBook({ status: "read" }),
+        createBook({ status: "read" }),
+      ]);
+    });
+
+    it("すべての本を表示する", async () => {
+      const user = userEvent.setup();
+
+      render(<App />);
+
+      const bookListSectionElement = getBookListSectionElement();
+      const navElement = getNavElement();
+
+      await user.click(
+        within(navElement).getByRole("button", { name: "未読" }),
+      );
+      await user.click(
+        within(navElement).getByRole("button", { name: "すべて" }),
+      );
+
+      expect(
+        within(bookListSectionElement).getAllByRole("listitem"),
+      ).toHaveLength(9);
+    });
+
+    it.each<{
+      status: BookStatus;
+      count: number;
+    }>([
+      {
+        status: "unread",
+        count: 2,
+      },
+      {
+        status: "reading",
+        count: 3,
+      },
+      {
+        status: "read",
+        count: 4,
+      },
+    ])(
+      "$status タブで該当するステータスの本のみ表示する",
+      async ({ status, count }) => {
+        const user = userEvent.setup();
+
+        render(<App />);
+
+        const bookListSectionElement = getBookListSectionElement();
+        const navElement = getNavElement();
+
+        await user.click(
+          within(navElement).getByRole("button", {
+            name: BOOK_STATUS_LABEL[status],
+          }),
+        );
+
+        expect(
+          within(bookListSectionElement).getAllByRole("listitem"),
+        ).toHaveLength(count);
+      },
+    );
   });
 });
