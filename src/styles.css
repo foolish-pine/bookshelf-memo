@@ -112,6 +112,19 @@ textarea {
   flex: 1;
 }
 
+/* 見出し付きの区画（見出し + 中身を縦に並べる） */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.section-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 /* ---------- フォーム ---------- */
 .form {
   display: flex;

@@ -168,21 +168,24 @@ export default function App() {
             onChange={(e) => setSearchText(e.target.value)}
           />
         </label>
-        {filteredBooks.length === 0 && (
-          <p className="empty">本がありません。</p>
-        )}
-        {filteredBooks.length !== 0 && searchedBooks.length === 0 && (
-          <p className="empty">検索ワードを含む本はありません。</p>
-        )}
-        {filteredBooks.length !== 0 && searchedBooks.length !== 0 && (
-          <BookList
-            books={sortedBooks}
-            editBook={editBook}
-            deleteBook={deleteBook}
-            advanceStatus={advanceStatus}
-            toggleRating={toggleRating}
-          />
-        )}
+        <section className="section">
+          <h2 className="section-title">本一覧</h2>
+          {filteredBooks.length === 0 && (
+            <p className="empty">本がありません。</p>
+          )}
+          {filteredBooks.length !== 0 && searchedBooks.length === 0 && (
+            <p className="empty">検索ワードを含む本はありません。</p>
+          )}
+          {filteredBooks.length !== 0 && searchedBooks.length !== 0 && (
+            <BookList
+              books={sortedBooks}
+              editBook={editBook}
+              deleteBook={deleteBook}
+              advanceStatus={advanceStatus}
+              toggleRating={toggleRating}
+            />
+          )}
+        </section>
       </main>
     </div>
   );
