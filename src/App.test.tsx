@@ -90,9 +90,9 @@ describe("App", () => {
     const targetBook = await addBook(user);
     const anotherBook = await addBook(user);
 
-    const bookListElement = getBookListSectionElement();
+    const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
-      bookListElement,
+      bookListSectionElement,
       targetBook.title,
     );
 
@@ -102,10 +102,10 @@ describe("App", () => {
 
     expect(targetBookElement).not.toBeInTheDocument();
     expect(
-      within(bookListElement).getByText(anotherBook.title),
+      within(bookListSectionElement).getByText(anotherBook.title),
     ).toBeInTheDocument();
     expect(
-      within(bookListElement).getByText(anotherBook.author),
+      within(bookListSectionElement).getByText(anotherBook.author),
     ).toBeInTheDocument();
   });
 
@@ -191,5 +191,38 @@ describe("App", () => {
         name: "未読",
       }),
     ).toBeInTheDocument();
+  });
+
+  it("本の評価を更新できる", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const targetBook = await addBook(user);
+    const anotherBook = await addBook(user);
+
+    const bookListSectionElement = getBookListSectionElement();
+    const targetBookElement = getTargetBookElement(
+      bookListSectionElement,
+      targetBook.title,
+    );
+    const anotherBookElement = getTargetBookElement(
+      bookListSectionElement,
+      anotherBook.title,
+    );
+
+    expect(
+      within(targetBookElement).queryAllByRole("button", { name: "★" }),
+    ).toHaveLength(0);
+
+    await user.click(
+      within(targetBookElement).getAllByRole("button", { name: /☆|★/ })[3],
+    );
+
+    expect(
+      within(targetBookElement).getAllByRole("button", { name: "★" }),
+    ).toHaveLength(4);
+    expect(
+      within(anotherBookElement).queryAllByRole("button", { name: "★" }),
+    ).toHaveLength(0);
   });
 });
