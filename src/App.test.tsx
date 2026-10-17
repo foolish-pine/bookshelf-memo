@@ -227,7 +227,7 @@ describe("App", () => {
   });
 
   describe("タイトル検索機能", () => {
-    it("入力値に部分一致するタイトルの本のみを表示する", async () => {
+    it("大文字小文字を区別せず入力値に部分一致するタイトルの本のみを表示する", async () => {
       const user = userEvent.setup();
       render(<App />);
 
