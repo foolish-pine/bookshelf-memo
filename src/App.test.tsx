@@ -26,9 +26,9 @@ const getTargetBookElement = (
   return targetBook;
 };
 
-const addBook = async (user: UserEvent, bookTitle: string = "") => {
+const addBook = async (user: UserEvent, bookTitle?: string) => {
   const randomId = crypto.randomUUID();
-  const title = bookTitle || `タイトル-${randomId}`;
+  const title = bookTitle ?? `タイトル-${randomId}`;
   const author = `著者-${randomId}`;
 
   const bookListSectionElement = getBookListSectionElement();
@@ -246,7 +246,7 @@ describe("App", () => {
 
       const searchInput = screen.getByLabelText("タイトルで検索");
 
-      await user.type(searchInput, "target");
+      await user.type(searchInput, "GETBO");
 
       expect(targetBookElement).toBeInTheDocument();
       expect(anotherBookElement).not.toBeInTheDocument();
