@@ -1,8 +1,29 @@
 import { render, screen, within } from "@testing-library/react";
-import userEvent, { type UserEvent } from "@testing-library/user-event";
+import userEvent from "@testing-library/user-event";
 import App from "./App.tsx";
 import type { Book } from "./domain/book.ts";
 import { LOCAL_STORAGE_BOOKS_KEY } from "./storage.ts";
+
+const createBook = ({
+  title,
+  author,
+  status,
+  rating,
+}: Partial<Omit<Book, "id">> = {}): Book => {
+  const randomId = crypto.randomUUID();
+
+  return {
+    id: `id-${randomId}`,
+    title: title ?? `タイトル-${randomId}`,
+    author: author ?? `著者-${randomId}`,
+    status: status ?? "unread",
+    rating: rating ?? null,
+  };
+};
+
+const setupBooksInLocalStorage = (books: Book[]) => {
+  localStorage.setItem(LOCAL_STORAGE_BOOKS_KEY, JSON.stringify(books));
+};
 
 const getBookListSectionElement = () => {
   const bookListSectionElement = screen
@@ -27,47 +48,6 @@ const getTargetBookElement = (
 
   return targetBook;
 };
-
-const addBook = async (user: UserEvent, bookTitle?: string) => {
-  const randomId = crypto.randomUUID();
-  const title = bookTitle ?? `タイトル-${randomId}`;
-  const author = `著者-${randomId}`;
-
-  const bookListSectionElement = getBookListSectionElement();
-
-  expect(
-    within(bookListSectionElement).queryByText(title),
-  ).not.toBeInTheDocument();
-  expect(
-    within(bookListSectionElement).queryByText(author),
-  ).not.toBeInTheDocument();
-
-  const titleInput = screen.getByLabelText("タイトル");
-  const authorInput = screen.getByLabelText("著者");
-
-  await user.clear(titleInput);
-  await user.type(titleInput, title);
-  await user.clear(authorInput);
-  await user.type(authorInput, author);
-  await user.click(screen.getByRole("button", { name: "登録する" }));
-
-  expect(within(bookListSectionElement).getByText(title)).toBeInTheDocument();
-  expect(within(bookListSectionElement).getByText(author)).toBeInTheDocument();
-
-  return { title, author };
-};
-
-const addBooksToLocalStorage = (books: Book[]) => {
-  localStorage.setItem(LOCAL_STORAGE_BOOKS_KEY, JSON.stringify(books));
-};
-
-const sampleBook = {
-  id: "11111111-1111-1111-1111-111111111111",
-  title: "タイトル",
-  author: "著者",
-  status: "unread",
-  rating: 3,
-} satisfies Book;
 
 afterEach(() => {
   localStorage.clear();
@@ -100,25 +80,16 @@ describe("App", () => {
   it("本を削除できる", async () => {
     const user = userEvent.setup();
 
-    const targetBookTitle = "targetBookTitle";
-    const anotherBookTitle = "anotherBookTitle";
-    const anotherBookAuthor = "anotherBookAuthor";
-    addBooksToLocalStorage([
-      { ...sampleBook, title: targetBookTitle },
-      {
-        ...sampleBook,
-        id: "22222222-2222-2222-2222-222222222222",
-        title: anotherBookTitle,
-        author: anotherBookAuthor,
-      },
-    ]);
+    const targetBook = createBook();
+    const anotherBook = createBook();
+    setupBooksInLocalStorage([targetBook, anotherBook]);
 
     render(<App />);
 
     const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
       bookListSectionElement,
-      targetBookTitle,
+      targetBook.title,
     );
 
     await user.click(
@@ -127,19 +98,20 @@ describe("App", () => {
 
     expect(targetBookElement).not.toBeInTheDocument();
     expect(
-      within(bookListSectionElement).getByText(anotherBookTitle),
+      within(bookListSectionElement).getByText(anotherBook.title),
     ).toBeInTheDocument();
     expect(
-      within(bookListSectionElement).getByText(anotherBookAuthor),
+      within(bookListSectionElement).getByText(anotherBook.author),
     ).toBeInTheDocument();
   });
 
   it("本のタイトルと著者を編集できる", async () => {
     const user = userEvent.setup();
-    render(<App />);
 
-    const targetBook = await addBook(user);
-    const anotherBook = await addBook(user);
+    const targetBook = createBook();
+    const anotherBook = createBook();
+    setupBooksInLocalStorage([targetBook, anotherBook]);
+    render(<App />);
 
     const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
@@ -186,10 +158,11 @@ describe("App", () => {
 
   it("本のステータスを更新できる", async () => {
     const user = userEvent.setup();
-    render(<App />);
 
-    const targetBook = await addBook(user);
-    const anotherBook = await addBook(user);
+    const targetBook = createBook();
+    const anotherBook = createBook();
+    setupBooksInLocalStorage([targetBook, anotherBook]);
+    render(<App />);
 
     const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
@@ -220,10 +193,11 @@ describe("App", () => {
 
   it("本の評価を更新できる", async () => {
     const user = userEvent.setup();
-    render(<App />);
 
-    const targetBook = await addBook(user);
-    const anotherBook = await addBook(user);
+    const targetBook = createBook();
+    const anotherBook = createBook();
+    setupBooksInLocalStorage([targetBook, anotherBook]);
+    render(<App />);
 
     const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
@@ -254,10 +228,11 @@ describe("App", () => {
   describe("タイトル検索機能", () => {
     it("大文字小文字を区別せず入力値に部分一致するタイトルの本のみを表示する", async () => {
       const user = userEvent.setup();
-      render(<App />);
 
-      const targetBook = await addBook(user, "targetBook");
-      const anotherBook = await addBook(user, "anotherBook");
+      const targetBook = createBook({ title: "targetBook" });
+      const anotherBook = createBook({ title: "anotherBook" });
+      setupBooksInLocalStorage([targetBook, anotherBook]);
+      render(<App />);
 
       const bookListSectionElement = getBookListSectionElement();
       const targetBookElement = getTargetBookElement(
@@ -279,10 +254,11 @@ describe("App", () => {
 
     it("部分一致する本がないとき、テキストが表示される", async () => {
       const user = userEvent.setup();
-      render(<App />);
 
-      const targetBook = await addBook(user, "targetBook");
-      const anotherBook = await addBook(user, "anotherBook");
+      const targetBook = createBook({ title: "targetBook" });
+      const anotherBook = createBook({ title: "anotherBook" });
+      setupBooksInLocalStorage([targetBook, anotherBook]);
+      render(<App />);
 
       const bookListSectionElement = getBookListSectionElement();
       const targetBookElement = getTargetBookElement(
