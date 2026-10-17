@@ -26,9 +26,9 @@ const getTargetBookElement = (
   return targetBook;
 };
 
-const addBook = async (user: UserEvent) => {
+const addBook = async (user: UserEvent, bookTitle: string = "") => {
   const randomId = crypto.randomUUID();
-  const title = `タイトル-${randomId}`;
+  const title = bookTitle || `タイトル-${randomId}`;
   const author = `著者-${randomId}`;
 
   const bookListSectionElement = getBookListSectionElement();
@@ -224,5 +224,62 @@ describe("App", () => {
     expect(
       within(anotherBookElement).queryAllByRole("button", { name: "★" }),
     ).toHaveLength(0);
+  });
+
+  describe("タイトル検索機能", () => {
+    it("入力値に部分一致するタイトルの本のみを表示する", async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      const targetBook = await addBook(user, "targetBook");
+      const anotherBook = await addBook(user, "anotherBook");
+
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
+      const anotherBookElement = getTargetBookElement(
+        bookListSectionElement,
+        anotherBook.title,
+      );
+
+      const searchInput = screen.getByLabelText("タイトルで検索");
+
+      await user.type(searchInput, "target");
+
+      expect(targetBookElement).toBeInTheDocument();
+      expect(anotherBookElement).not.toBeInTheDocument();
+    });
+
+    it("部分一致する本がないとき、テキストが表示される", async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      const targetBook = await addBook(user, "targetBook");
+      const anotherBook = await addBook(user, "anotherBook");
+
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
+      const anotherBookElement = getTargetBookElement(
+        bookListSectionElement,
+        anotherBook.title,
+      );
+
+      const searchInput = screen.getByLabelText("タイトルで検索");
+
+      await user.type(searchInput, "not-existing-title");
+
+      expect(targetBookElement).not.toBeInTheDocument();
+      expect(anotherBookElement).not.toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).getByText(
+          "検索ワードを含む本はありません。",
+        ),
+      ).toBeInTheDocument();
+    });
   });
 });
