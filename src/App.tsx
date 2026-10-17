@@ -11,6 +11,7 @@ import {
 } from "./domain/book";
 import { bookReducer } from "./domain/bookReducer";
 import { useSaveToLocalStorage } from "./hooks/useSaveToLocalStorage";
+import { LOCAL_STORAGE_BOOKS_KEY } from "./storage";
 import { loadFromLocalStorage } from "./utils/loadFromLocalStorage";
 
 const BOOK_LIST_ORDER = ["addedAt", "rating", "title"] as const;
@@ -25,13 +26,11 @@ const BOOK_LIST_ORDER_LABEL = {
 
 type StatusFilter = BookStatus | "all";
 
-const STORAGE_KEY = "books";
-
 export default function App() {
   const [books, dispatch] = useReducer(bookReducer, [], () =>
-    loadFromLocalStorage(STORAGE_KEY, [], isBooks),
+    loadFromLocalStorage(LOCAL_STORAGE_BOOKS_KEY, [], isBooks),
   );
-  useSaveToLocalStorage(STORAGE_KEY, books);
+  useSaveToLocalStorage(LOCAL_STORAGE_BOOKS_KEY, books);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const filteredBooks =

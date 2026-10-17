@@ -1,6 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import App from "./App.tsx";
+import type { Book } from "./domain/book.ts";
+import { LOCAL_STORAGE_BOOKS_KEY } from "./storage.ts";
 
 const getBookListSectionElement = () => {
   const bookListSectionElement = screen
@@ -55,6 +57,18 @@ const addBook = async (user: UserEvent, bookTitle?: string) => {
   return { title, author };
 };
 
+const addBooksToLocalStorage = (books: Book[]) => {
+  localStorage.setItem(LOCAL_STORAGE_BOOKS_KEY, JSON.stringify(books));
+};
+
+const sampleBook = {
+  id: "11111111-1111-1111-1111-111111111111",
+  title: "タイトル",
+  author: "著者",
+  status: "unread",
+  rating: 3,
+} satisfies Book;
+
 afterEach(() => {
   localStorage.clear();
 });
@@ -85,15 +99,26 @@ describe("App", () => {
 
   it("本を削除できる", async () => {
     const user = userEvent.setup();
-    render(<App />);
 
-    const targetBook = await addBook(user);
-    const anotherBook = await addBook(user);
+    const targetBookTitle = "targetBookTitle";
+    const anotherBookTitle = "anotherBookTitle";
+    const anotherBookAuthor = "anotherBookAuthor";
+    addBooksToLocalStorage([
+      { ...sampleBook, title: targetBookTitle },
+      {
+        ...sampleBook,
+        id: "22222222-2222-2222-2222-222222222222",
+        title: anotherBookTitle,
+        author: anotherBookAuthor,
+      },
+    ]);
+
+    render(<App />);
 
     const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
       bookListSectionElement,
-      targetBook.title,
+      targetBookTitle,
     );
 
     await user.click(
@@ -102,10 +127,10 @@ describe("App", () => {
 
     expect(targetBookElement).not.toBeInTheDocument();
     expect(
-      within(bookListSectionElement).getByText(anotherBook.title),
+      within(bookListSectionElement).getByText(anotherBookTitle),
     ).toBeInTheDocument();
     expect(
-      within(bookListSectionElement).getByText(anotherBook.author),
+      within(bookListSectionElement).getByText(anotherBookAuthor),
     ).toBeInTheDocument();
   });
 
