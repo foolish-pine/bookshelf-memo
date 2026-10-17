@@ -283,4 +283,23 @@ describe("App", () => {
       ).toBeInTheDocument();
     });
   });
+
+  it("登録している本、読書中の本、読了済みの本の数を表示する", async () => {
+    setupBooksInLocalStorage([
+      createBook({ status: "unread" }),
+      createBook({ status: "unread" }),
+      createBook({ status: "reading" }),
+      createBook({ status: "reading" }),
+      createBook({ status: "reading" }),
+      createBook({ status: "read" }),
+      createBook({ status: "read" }),
+      createBook({ status: "read" }),
+      createBook({ status: "read" }),
+    ]);
+    render(<App />);
+
+    expect(
+      screen.getByText("登録数: 9 / 読書中: 3 / 読了: 4"),
+    ).toBeInTheDocument();
+  });
 });
