@@ -2,17 +2,21 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import App from "./App.tsx";
 
-const getBookListSection = () => {
-  const bookListSection = screen
+const getBookListSectionElement = () => {
+  const bookListSectionElement = screen
     .getByRole("heading", { name: "本一覧" })
     .closest("section");
 
-  if (!bookListSection) throw new Error("bookListSection does not exist.");
+  if (!bookListSectionElement)
+    throw new Error("bookListSectionElement does not exist.");
 
-  return bookListSection;
+  return bookListSectionElement;
 };
 
-const getTargetBook = (bookListSection: HTMLElement, bookTitle: string) => {
+const getTargetBookElement = (
+  bookListSection: HTMLElement,
+  bookTitle: string,
+) => {
   const targetBook = within(bookListSection)
     .getAllByRole("listitem")
     .find((li) => within(li).queryByText(bookTitle));
@@ -27,10 +31,14 @@ const addBook = async (user: UserEvent) => {
   const title = `タイトル-${randomId}`;
   const author = `著者-${randomId}`;
 
-  const bookListSection = getBookListSection();
+  const bookListSectionElement = getBookListSectionElement();
 
-  expect(within(bookListSection).queryByText(title)).not.toBeInTheDocument();
-  expect(within(bookListSection).queryByText(author)).not.toBeInTheDocument();
+  expect(
+    within(bookListSectionElement).queryByText(title),
+  ).not.toBeInTheDocument();
+  expect(
+    within(bookListSectionElement).queryByText(author),
+  ).not.toBeInTheDocument();
 
   const titleInput = screen.getByLabelText("タイトル");
   const authorInput = screen.getByLabelText("著者");
@@ -41,8 +49,8 @@ const addBook = async (user: UserEvent) => {
   await user.type(authorInput, author);
   await user.click(screen.getByRole("button", { name: "登録する" }));
 
-  expect(within(bookListSection).getByText(title)).toBeInTheDocument();
-  expect(within(bookListSection).getByText(author)).toBeInTheDocument();
+  expect(within(bookListSectionElement).getByText(title)).toBeInTheDocument();
+  expect(within(bookListSectionElement).getByText(author)).toBeInTheDocument();
 
   return { title, author };
 };
@@ -59,69 +67,129 @@ describe("App", () => {
     const title = "本のタイトル";
     const author = "本の著者";
 
-    const bookListSection = getBookListSection();
+    const bookListSectionElement = getBookListSectionElement();
 
     expect(
-      within(bookListSection).queryByText("本がありません。"),
+      within(bookListSectionElement).queryByText("本がありません。"),
     ).toBeInTheDocument();
 
     await user.type(screen.getByLabelText("タイトル"), title);
     await user.type(screen.getByLabelText("著者"), author);
     await user.click(screen.getByRole("button", { name: "登録する" }));
 
-    expect(within(bookListSection).getByText(title)).toBeInTheDocument();
-    expect(within(bookListSection).getByText(author)).toBeInTheDocument();
+    expect(within(bookListSectionElement).getByText(title)).toBeInTheDocument();
+    expect(
+      within(bookListSectionElement).getByText(author),
+    ).toBeInTheDocument();
   });
 
   it("本を削除できる", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const { title, author } = await addBook(user);
-    const { title: targetTitle } = await addBook(user);
+    const targetBook = await addBook(user);
+    const anotherBook = await addBook(user);
 
-    const bookListSection = getBookListSection();
-    const targetBook = getTargetBook(bookListSection, targetTitle);
+    const bookListElement = getBookListSectionElement();
+    const targetBookElement = getTargetBookElement(
+      bookListElement,
+      targetBook.title,
+    );
 
-    await user.click(within(targetBook).getByRole("button", { name: "削除" }));
+    await user.click(
+      within(targetBookElement).getByRole("button", { name: "削除" }),
+    );
 
-    expect(targetBook).not.toBeInTheDocument();
-    expect(within(bookListSection).getByText(title)).toBeInTheDocument();
-    expect(within(bookListSection).getByText(author)).toBeInTheDocument();
+    expect(targetBookElement).not.toBeInTheDocument();
+    expect(
+      within(bookListElement).getByText(anotherBook.title),
+    ).toBeInTheDocument();
+    expect(
+      within(bookListElement).getByText(anotherBook.author),
+    ).toBeInTheDocument();
   });
 
   it("本のタイトルと著者を編集できる", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const { title, author } = await addBook(user);
-    const { title: targetTitle, author: targetAuthor } = await addBook(user);
+    const targetBook = await addBook(user);
+    const anotherBook = await addBook(user);
 
-    const bookListSection = getBookListSection();
-    const targetBook = getTargetBook(bookListSection, targetTitle);
+    const bookListSectionElement = getBookListSectionElement();
+    const targetBookElement = getTargetBookElement(
+      bookListSectionElement,
+      targetBook.title,
+    );
 
-    await user.click(within(targetBook).getByRole("button", { name: "編集" }));
+    await user.click(
+      within(targetBookElement).getByRole("button", { name: "編集" }),
+    );
 
     const newTitle = "新しいタイトル";
-    const titleInput = within(targetBook).getByLabelText("タイトル");
+    const titleInput = within(targetBookElement).getByLabelText("タイトル");
     const newAuthor = "新しい著者";
-    const authorInput = within(targetBook).getByLabelText("著者");
+    const authorInput = within(targetBookElement).getByLabelText("著者");
 
     await user.clear(titleInput);
     await user.type(titleInput, newTitle);
     await user.clear(authorInput);
     await user.type(authorInput, newAuthor);
-    await user.click(within(targetBook).getByRole("button", { name: "保存" }));
+    await user.click(
+      within(targetBookElement).getByRole("button", { name: "保存" }),
+    );
 
     expect(
-      within(bookListSection).queryByText(targetTitle),
+      within(bookListSectionElement).queryByText(targetBook.title),
     ).not.toBeInTheDocument();
     expect(
-      within(bookListSection).queryByText(targetAuthor),
+      within(bookListSectionElement).queryByText(targetBook.author),
     ).not.toBeInTheDocument();
-    expect(within(bookListSection).getByText(newTitle)).toBeInTheDocument();
-    expect(within(bookListSection).getByText(newAuthor)).toBeInTheDocument();
-    expect(within(bookListSection).getByText(title)).toBeInTheDocument();
-    expect(within(bookListSection).getByText(author)).toBeInTheDocument();
+    expect(
+      within(bookListSectionElement).getByText(newTitle),
+    ).toBeInTheDocument();
+    expect(
+      within(bookListSectionElement).getByText(newAuthor),
+    ).toBeInTheDocument();
+    expect(
+      within(bookListSectionElement).getByText(anotherBook.title),
+    ).toBeInTheDocument();
+    expect(
+      within(bookListSectionElement).getByText(anotherBook.author),
+    ).toBeInTheDocument();
+  });
+
+  it("本のステータスを更新できる", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const targetBook = await addBook(user);
+    const anotherBook = await addBook(user);
+
+    const bookListSectionElement = getBookListSectionElement();
+    const targetBookElement = getTargetBookElement(
+      bookListSectionElement,
+      targetBook.title,
+    );
+    const statusButtonElement = within(targetBookElement).getByRole("button", {
+      name: "未読",
+    });
+    const anotherBookElement = getTargetBookElement(
+      bookListSectionElement,
+      anotherBook.title,
+    );
+
+    await user.click(statusButtonElement);
+
+    expect(
+      within(targetBookElement).getByRole("button", {
+        name: "読書中",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(anotherBookElement).getByRole("button", {
+        name: "未読",
+      }),
+    ).toBeInTheDocument();
   });
 });
