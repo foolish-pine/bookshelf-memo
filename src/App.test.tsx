@@ -501,4 +501,41 @@ describe("App", () => {
       ]);
     });
   });
+
+  it("ブラウザをリロードしても操作の結果が残る", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<App />);
+
+    const title = "本のタイトル";
+    const author = "本の著者";
+
+    const beforeBookListSectionElement = getBookListSectionElement();
+
+    expect(
+      within(beforeBookListSectionElement).queryByText("本がありません。"),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("タイトル"), title);
+    await user.type(screen.getByLabelText("著者"), author);
+    await user.click(screen.getByRole("button", { name: "登録する" }));
+
+    expect(
+      within(beforeBookListSectionElement).getByText(title),
+    ).toBeInTheDocument();
+    expect(
+      within(beforeBookListSectionElement).getByText(author),
+    ).toBeInTheDocument();
+
+    unmount();
+    render(<App />);
+
+    const afterBookListSectionElement = getBookListSectionElement();
+
+    expect(
+      within(afterBookListSectionElement).getByText(title),
+    ).toBeInTheDocument();
+    expect(
+      within(afterBookListSectionElement).getByText(author),
+    ).toBeInTheDocument();
+  });
 });
