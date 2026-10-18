@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 
-type OpenLibraryDoc = {
+export type OpenLibraryDoc = {
   key: string;
   title: string;
   author_name?: string[];
 };
 
-type OpenLibrarySearchResponse = {
+export type OpenLibrarySearchResponse = {
   start: number;
   numFound: number;
   docs: OpenLibraryDoc[];
@@ -14,15 +14,25 @@ type OpenLibrarySearchResponse = {
 
 const isOpenLibraryDoc = (value: unknown): value is OpenLibraryDoc => {
   if (typeof value !== "object" || value === null) return false;
+
   const doc = value as Record<string, unknown>;
-  return typeof doc.key === "string" && typeof doc.title === "string";
+
+  return (
+    typeof doc.key === "string" &&
+    typeof doc.title === "string" &&
+    (doc.author_name === undefined ||
+      (Array.isArray(doc.author_name) &&
+        doc.author_name.every((s) => typeof s === "string")))
+  );
 };
 
-const isOpenLibrarySearchResponse = (
+export const isOpenLibrarySearchResponse = (
   value: unknown,
 ): value is OpenLibrarySearchResponse => {
   if (typeof value !== "object" || value === null) return false;
+
   const res = value as Record<string, unknown>;
+
   return (
     typeof res.start === "number" &&
     typeof res.numFound === "number" &&
