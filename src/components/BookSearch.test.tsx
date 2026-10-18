@@ -1,26 +1,30 @@
-import {
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
+import { setupServer } from "msw/node";
+import BookSearch, {
   isOpenLibrarySearchResponse,
   type OpenLibraryDoc,
   type OpenLibrarySearchResponse,
 } from "./BookSearch";
 
 describe("BookSearch", () => {
-  describe("isOpenLibrarySearchResponse", () => {
-    const validOpenLibraryDoc = {
-      key: "/works/key1",
-      title: "Book Title 1",
-    } satisfies OpenLibraryDoc;
-    const validOpenLibraryDocWithAuthors = {
-      key: "/works/key2",
-      title: "Book Title 2",
-      author_name: ["First Author", "Second Author"],
-    } satisfies OpenLibraryDoc;
-    const validOpenLibrarySearchResponse = {
-      start: 0,
-      numFound: 100,
-      docs: [validOpenLibraryDoc, validOpenLibraryDocWithAuthors],
-    } satisfies OpenLibrarySearchResponse;
+  const validOpenLibraryDoc = {
+    key: "/works/key1",
+    title: "Book Title 1",
+  } satisfies OpenLibraryDoc;
+  const validOpenLibraryDocWithAuthors = {
+    key: "/works/key2",
+    title: "Book Title 2",
+    author_name: ["First Author", "Second Author"],
+  } satisfies OpenLibraryDoc;
+  const validOpenLibrarySearchResponse = {
+    start: 0,
+    numFound: 100,
+    docs: [validOpenLibraryDoc, validOpenLibraryDocWithAuthors],
+  } satisfies OpenLibrarySearchResponse;
 
+  describe("isOpenLibrarySearchResponse", () => {
     const omit = (key: keyof typeof validOpenLibrarySearchResponse) =>
       Object.fromEntries(
         Object.entries(validOpenLibrarySearchResponse).filter(
@@ -168,6 +172,48 @@ describe("BookSearch", () => {
           docs,
         }),
       ).toBe(false);
+    });
+  });
+
+  describe("BookSearch", () => {
+    const handlers = [
+      http.get("https://openlibrary.org/search.json", () => {
+        return HttpResponse.json(validOpenLibrarySearchResponse);
+      }),
+    ];
+    const server = setupServer(...handlers);
+
+    beforeAll(() => server.listen({ onUnhandledFrame: "error" }));
+    afterEach(() => server.resetHandlers());
+    afterAll(() => server.close());
+
+    it("レスポンスの結果が表示される", async () => {
+      server.use(
+        http.get("https://openlibrary.org/search.json", () => {
+          return HttpResponse.json(validOpenLibrarySearchResponse);
+        }),
+      );
+
+      const user = userEvent.setup();
+      render(<BookSearch addBook={vi.fn()} />);
+
+      await user.type(
+        screen.getByLabelText("本を検索"),
+        validOpenLibraryDoc.title,
+      );
+
+      expect(
+        await screen.findByText(`タイトル: ${validOpenLibraryDoc.title}`),
+      ).toBeInTheDocument();
+      expect(screen.getByText(`著者: 著者未設定`)).toBeInTheDocument();
+      expect(
+        screen.getByText(`タイトル: ${validOpenLibraryDocWithAuthors.title}`),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          `著者: ${validOpenLibraryDocWithAuthors.author_name.join(", ")}`,
+        ),
+      ).toBeInTheDocument();
     });
   });
 });
