@@ -20,7 +20,7 @@ describe("BookSearch", () => {
   } satisfies OpenLibraryDoc;
   const validOpenLibrarySearchResponse = {
     start: 0,
-    numFound: 100,
+    numFound: 2,
     docs: [validOpenLibraryDoc, validOpenLibraryDocWithAuthors],
   } satisfies OpenLibrarySearchResponse;
 
@@ -212,6 +212,83 @@ describe("BookSearch", () => {
       expect(
         screen.getByText(
           `著者: ${validOpenLibraryDocWithAuthors.author_name.join(", ")}`,
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("検索に一致する本が0件のとき、テキストが表示される", async () => {
+      server.use(
+        http.get("https://openlibrary.org/search.json", () =>
+          HttpResponse.json({
+            start: 0,
+            numFound: 2,
+            docs: [],
+          }),
+        ),
+      );
+
+      const user = userEvent.setup();
+      render(<BookSearch addBook={vi.fn()} />);
+
+      await user.type(
+        screen.getByLabelText("本を検索"),
+        validOpenLibraryDoc.title,
+      );
+
+      expect(
+        await screen.findByText(
+          "お探しの本はありませんでした。別のキーワードで検索してください。",
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("検索に失敗したとき、エラーテキストが表示される", async () => {
+      server.use(
+        http.get("https://openlibrary.org/search.json", () =>
+          HttpResponse.json(
+            { error: "Internal Server Error" },
+            { status: 500 },
+          ),
+        ),
+      );
+
+      const user = userEvent.setup();
+      render(<BookSearch addBook={vi.fn()} />);
+
+      await user.type(
+        screen.getByLabelText("本を検索"),
+        validOpenLibraryDoc.title,
+      );
+
+      expect(
+        await screen.findByText(
+          "エラーが発生しました。時間をおいてもう一度お試しください。",
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("レスポンスが不正な形式のとき、エラーテキストが表示される", async () => {
+      server.use(
+        http.get("https://openlibrary.org/search.json", () =>
+          HttpResponse.json({
+            start: 0,
+            numFound: 0,
+            docs: null,
+          }),
+        ),
+      );
+
+      const user = userEvent.setup();
+      render(<BookSearch addBook={vi.fn()} />);
+
+      await user.type(
+        screen.getByLabelText("本を検索"),
+        validOpenLibraryDoc.title,
+      );
+
+      expect(
+        await screen.findByText(
+          "エラーが発生しました。時間をおいてもう一度お試しください。",
         ),
       ).toBeInTheDocument();
     });
