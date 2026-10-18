@@ -60,27 +60,59 @@ afterEach(() => {
 });
 
 describe("App", () => {
-  it("本を追加できる", async () => {
-    const user = userEvent.setup();
-    render(<App />);
+  describe("追加フォームからの本の追加", () => {
+    it("本を追加できる", async () => {
+      const user = userEvent.setup();
+      render(<App />);
 
-    const title = "本のタイトル";
-    const author = "本の著者";
+      const title = "本のタイトル";
+      const author = "本の著者";
 
-    const bookListSectionElement = getBookListSectionElement();
+      const bookListSectionElement = getBookListSectionElement();
 
-    expect(
-      within(bookListSectionElement).queryByText("本がありません。"),
-    ).toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).queryByText("本がありません。"),
+      ).toBeInTheDocument();
 
-    await user.type(screen.getByLabelText("タイトル"), title);
-    await user.type(screen.getByLabelText("著者"), author);
-    await user.click(screen.getByRole("button", { name: "登録する" }));
+      await user.type(screen.getByLabelText("タイトル"), title);
+      await user.type(screen.getByLabelText("著者"), author);
+      await user.click(screen.getByRole("button", { name: "登録する" }));
 
-    expect(within(bookListSectionElement).getByText(title)).toBeInTheDocument();
-    expect(
-      within(bookListSectionElement).getByText(author),
-    ).toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).getByText(title),
+      ).toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).getByText(author),
+      ).toBeInTheDocument();
+    });
+
+    it.each([
+      { title: "", author: "本の著者", label: "タイトルが空" },
+      { title: " ", author: "本の著者", label: "タイトルがスペースのみ" },
+      { title: "本のタイトル", author: "", label: "著者が空" },
+      { title: "本のタイトル", author: " ", label: "著者がスペースのみ" },
+    ])("$label のとき、本は追加できない", async ({ title, author }) => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      const bookListSectionElement = getBookListSectionElement();
+
+      expect(
+        within(bookListSectionElement).queryByText("本がありません。"),
+      ).toBeInTheDocument();
+
+      if (title !== "") {
+        await user.type(screen.getByLabelText("タイトル"), title);
+      }
+      if (author !== "") {
+        await user.type(screen.getByLabelText("著者"), author);
+      }
+      await user.click(screen.getByRole("button", { name: "登録する" }));
+
+      expect(
+        within(bookListSectionElement).queryByText("本がありません。"),
+      ).toBeInTheDocument();
+    });
   });
 
   it("本を削除できる", async () => {
