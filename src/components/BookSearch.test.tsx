@@ -183,8 +183,17 @@ describe("BookSearch", () => {
     ];
     const server = setupServer(...handlers);
 
+    beforeEach(() => {
+      vi.useFakeTimers({
+        toFake: ["setTimeout", "clearTimeout"],
+        shouldAdvanceTime: true,
+      });
+    });
     beforeAll(() => server.listen({ onUnhandledFrame: "error" }));
-    afterEach(() => server.resetHandlers());
+    afterEach(() => {
+      vi.useRealTimers();
+      server.resetHandlers();
+    });
     afterAll(() => server.close());
 
     it("レスポンスの結果が表示される", async () => {
@@ -194,13 +203,14 @@ describe("BookSearch", () => {
         }),
       );
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       render(<BookSearch addBook={vi.fn()} />);
 
       await user.type(
         screen.getByLabelText("本を検索"),
         validOpenLibraryDoc.title,
       );
+      await vi.advanceTimersByTimeAsync(500);
 
       expect(
         await screen.findByText(`タイトル: ${validOpenLibraryDoc.title}`),
@@ -221,19 +231,20 @@ describe("BookSearch", () => {
         http.get("https://openlibrary.org/search.json", () =>
           HttpResponse.json({
             start: 0,
-            numFound: 2,
+            numFound: 0,
             docs: [],
           }),
         ),
       );
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       render(<BookSearch addBook={vi.fn()} />);
 
       await user.type(
         screen.getByLabelText("本を検索"),
         validOpenLibraryDoc.title,
       );
+      await vi.advanceTimersByTimeAsync(500);
 
       expect(
         await screen.findByText(
@@ -252,13 +263,14 @@ describe("BookSearch", () => {
         ),
       );
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       render(<BookSearch addBook={vi.fn()} />);
 
       await user.type(
         screen.getByLabelText("本を検索"),
         validOpenLibraryDoc.title,
       );
+      await vi.advanceTimersByTimeAsync(500);
 
       expect(
         await screen.findByText(
@@ -278,13 +290,37 @@ describe("BookSearch", () => {
         ),
       );
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       render(<BookSearch addBook={vi.fn()} />);
 
       await user.type(
         screen.getByLabelText("本を検索"),
         validOpenLibraryDoc.title,
       );
+      await vi.advanceTimersByTimeAsync(500);
+
+      expect(
+        await screen.findByText(
+          "エラーが発生しました。時間をおいてもう一度お試しください。",
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("通信エラーのとき、エラーテキストが表示される", async () => {
+      server.use(
+        http.get("https://openlibrary.org/search.json", () =>
+          HttpResponse.error(),
+        ),
+      );
+
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      render(<BookSearch addBook={vi.fn()} />);
+
+      await user.type(
+        screen.getByLabelText("本を検索"),
+        validOpenLibraryDoc.title,
+      );
+      await vi.advanceTimersByTimeAsync(500);
 
       expect(
         await screen.findByText(

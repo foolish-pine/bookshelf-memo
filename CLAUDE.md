@@ -63,13 +63,13 @@ Claude はステップ完了時にここを更新する。
 - [x] **Step 13: 編集機能** — タイトル・著者をその場で編集（2026-10-14 完了。非制御フォームで実装、編集中フラグは BookCard に置く）
 - [x] **Step 14: 並び替えと検索** — 追加順 / 評価順 / タイトル順、タイトル検索（2026-10-14 完了。追加順は配列順を使い、検索は大文字小文字を区別しない）
 - [x] **Step 15: 外部APIから取得** — Open Library Search API で書誌情報を検索して追加（ローディング・エラー表示）。Google Books API は利用制限が面倒なため変更（2026-10-14 完了。入力ごとのデバウンス検索、AbortController で競合対策、検索状態は判別可能なユニオン型）
-- [ ] **Step 16: テストを書く** — Vitest + React Testing Library を導入し、reducer・ドメイン関数・コンポーネントのテストを書く
+- [x] **Step 16: テストを書く** — Vitest + React Testing Library を導入し、reducer・ドメイン関数・コンポーネントのテストを書く（2026-10-18 完了）
   - [x] **16-1: 環境構築** — Vitest / React Testing Library / jsdom を導入し、`npm test` で実行できるようにする（2026-10-15 完了。DOM 環境は happy-dom、globals: true）
   - [x] **16-2: ドメイン関数** — `nextBookStatus` と `isBooks` のテスト（2026-10-15 完了。非公開の isBook 等は isBooks 経由でテスト）
   - [x] **16-3: reducer** — 全アクションのテスト。元の state が変わらないことも確認する（2026-10-15 完了。reducer を src/domain/bookReducer.ts に切り出し、freezeState で元の state の不変を確認）
   - [x] **16-4: localStorage の読み込み** — データなし・壊れた JSON・形が違うデータで初期値が返るテスト。テスト間の後片付け（2026-10-15 完了。getItem の例外は vi.stubGlobal で localStorage ごと差し替え、afterEach で戻してから clear）
   - [x] **16-5: コンポーネント** — ユーザー操作を起点にした振る舞いのテストを2つ以上（2026-10-17 完了。App を描画する結合テストで追加・削除を確認。一覧に見出し「本一覧」を付け、aria-labelledby は使わず closest("section") で範囲を絞る。入力前に user.clear で user-event の入力値の記録を消す）
-  - [ ] **16-6: BookSearch（任意）** — `fetch` をモックし、成功・0件・エラーの表示をテストする
+  - [x] **16-6: BookSearch（任意）** — `fetch` をモックし、成功・0件・エラーの表示をテストする（2026-10-18 完了。MSW で通信を差し替え、成功・0件・サーバーエラー・不正なレスポンス・通信エラーを確認。デバウンスはフェイクタイマーで進める。isOpenLibrarySearchResponse の単体テストで author_name の判定漏れを見つけて修正）
 - [ ] **Step 17: Context で props の受け渡しをなくす** — reducer と Context を組み合わせ、操作関数の props バケツリレーを解消する。Step 16 のテストが通ることを確認する
 
 ## 詰まったときの対応
