@@ -382,4 +382,91 @@ describe("App", () => {
       },
     );
   });
+
+  describe("本の並び順の変更", () => {
+    const book1 = createBook({ title: "ホンノタイトル", rating: 2 });
+    const book2 = createBook({ title: "本のタイトル", rating: 4 });
+    const book3 = createBook({ title: "English Book Title", rating: 1 });
+    const book4 = createBook({ title: "1. 本のタイトル", rating: null });
+    const book5 = createBook({ title: "本のタイ", rating: 3 });
+    const book6 = createBook({ title: "ほん", rating: 5 });
+    const initialBooks = [book1, book2, book3, book4, book5, book6];
+
+    const getBookElementTitles = () => {
+      const bookListSectionElement = getBookListSectionElement();
+      return within(bookListSectionElement)
+        .getAllByRole("listitem")
+        .map(
+          (bookElement) => within(bookElement).getByRole("heading").textContent,
+        );
+    };
+
+    beforeEach(() => {
+      setupBooksInLocalStorage(initialBooks);
+    });
+
+    it("追加順に並び替える", async () => {
+      const user = userEvent.setup();
+
+      render(<App />);
+
+      await user.selectOptions(
+        screen.getByRole("combobox", { name: "並び順" }),
+        "評価順",
+      );
+      await user.selectOptions(
+        screen.getByRole("combobox", { name: "並び順" }),
+        "追加順",
+      );
+
+      const bookElementTitles = getBookElementTitles();
+      const expected = initialBooks.map((book) => book.title);
+
+      expect(bookElementTitles).toStrictEqual(expected);
+    });
+
+    it("評価順に並び替える", async () => {
+      const user = userEvent.setup();
+
+      render(<App />);
+
+      await user.selectOptions(
+        screen.getByRole("combobox", { name: "並び順" }),
+        "評価順",
+      );
+
+      const bookElementTitles = getBookElementTitles();
+
+      expect(bookElementTitles).toStrictEqual([
+        book6.title,
+        book2.title,
+        book5.title,
+        book1.title,
+        book3.title,
+        book4.title,
+      ]);
+    });
+
+    it("タイトル順に並び替える", async () => {
+      const user = userEvent.setup();
+
+      render(<App />);
+
+      await user.selectOptions(
+        screen.getByRole("combobox", { name: "並び順" }),
+        "タイトル順",
+      );
+
+      const bookElementTitles = getBookElementTitles();
+
+      expect(bookElementTitles).toStrictEqual([
+        book4.title,
+        book3.title,
+        book6.title,
+        book1.title,
+        book5.title,
+        book2.title,
+      ]);
+    });
+  });
 });
