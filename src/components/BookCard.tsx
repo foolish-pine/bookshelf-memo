@@ -89,7 +89,7 @@ export default function BookCard({
         </form>
       ) : (
         <>
-          <p className="item-title">{book.title}</p>
+          <h3 className="item-title">{book.title}</h3>
           <p className="item-meta">{book.author}</p>
         </>
       )}

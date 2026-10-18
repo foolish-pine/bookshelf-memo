@@ -377,6 +377,8 @@ textarea {
 }
 .item-title {
   margin: 0;
+  /* h3 で使っても本文と同じ大きさにする */
+  font-size: 1rem;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
