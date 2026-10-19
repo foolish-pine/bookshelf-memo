@@ -1,8 +1,8 @@
-export default function AddBookForm({
-  addBook,
-}: {
-  addBook: ({ title, author }: { title: string; author: string }) => void;
-}) {
+import { useBooks } from "../contexts/BooksContext";
+
+export default function AddBookForm() {
+  const { addBook } = useBooks();
+
   const handleSubmit = (formData: FormData) => {
     const title = formData.get("title");
     const author = formData.get("author");

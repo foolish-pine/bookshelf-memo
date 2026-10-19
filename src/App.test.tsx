@@ -1,12 +1,17 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App.tsx";
+import { BooksProvider } from "./contexts/BooksContext.tsx";
 import {
   BOOK_STATUS_LABEL,
   type Book,
   type BookStatus,
 } from "./domain/book.ts";
 import { LOCAL_STORAGE_BOOKS_KEY } from "./storage.ts";
+
+const renderApp = () => {
+  return render(<App />, { wrapper: BooksProvider });
+};
 
 const createBook = ({
   title,
@@ -63,7 +68,7 @@ describe("App", () => {
   describe("追加フォームからの本の追加", () => {
     it("本を追加できる", async () => {
       const user = userEvent.setup();
-      render(<App />);
+      renderApp();
 
       const title = "本のタイトル";
       const author = "本の著者";
@@ -93,7 +98,7 @@ describe("App", () => {
       { title: "本のタイトル", author: " ", label: "著者がスペースのみ" },
     ])("$label のとき、本は追加できない", async ({ title, author }) => {
       const user = userEvent.setup();
-      render(<App />);
+      renderApp();
 
       const bookListSectionElement = getBookListSectionElement();
 
@@ -122,7 +127,7 @@ describe("App", () => {
     const anotherBook = createBook();
     setupBooksInLocalStorage([targetBook, anotherBook]);
 
-    render(<App />);
+    renderApp();
 
     const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
@@ -149,7 +154,7 @@ describe("App", () => {
     const targetBook = createBook();
     const anotherBook = createBook();
     setupBooksInLocalStorage([targetBook, anotherBook]);
-    render(<App />);
+    renderApp();
 
     const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
@@ -200,7 +205,7 @@ describe("App", () => {
     const targetBook = createBook();
     const anotherBook = createBook();
     setupBooksInLocalStorage([targetBook, anotherBook]);
-    render(<App />);
+    renderApp();
 
     const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
@@ -235,7 +240,7 @@ describe("App", () => {
     const targetBook = createBook();
     const anotherBook = createBook();
     setupBooksInLocalStorage([targetBook, anotherBook]);
-    render(<App />);
+    renderApp();
 
     const bookListSectionElement = getBookListSectionElement();
     const targetBookElement = getTargetBookElement(
@@ -270,7 +275,7 @@ describe("App", () => {
       const targetBook = createBook({ title: "targetBook" });
       const anotherBook = createBook({ title: "anotherBook" });
       setupBooksInLocalStorage([targetBook, anotherBook]);
-      render(<App />);
+      renderApp();
 
       const bookListSectionElement = getBookListSectionElement();
       const targetBookElement = getTargetBookElement(
@@ -296,7 +301,7 @@ describe("App", () => {
       const targetBook = createBook({ title: "targetBook" });
       const anotherBook = createBook({ title: "anotherBook" });
       setupBooksInLocalStorage([targetBook, anotherBook]);
-      render(<App />);
+      renderApp();
 
       const bookListSectionElement = getBookListSectionElement();
       const targetBookElement = getTargetBookElement(
@@ -334,7 +339,7 @@ describe("App", () => {
       createBook({ status: "read" }),
       createBook({ status: "read" }),
     ]);
-    render(<App />);
+    renderApp();
 
     expect(
       screen.getByText("登録数: 9 / 読書中: 3 / 読了: 4"),
@@ -359,7 +364,7 @@ describe("App", () => {
     it("すべての本を表示する", async () => {
       const user = userEvent.setup();
 
-      render(<App />);
+      renderApp();
 
       const bookListSectionElement = getBookListSectionElement();
       const navElement = getNavElement();
@@ -397,7 +402,7 @@ describe("App", () => {
       async ({ status, count }) => {
         const user = userEvent.setup();
 
-        render(<App />);
+        renderApp();
 
         const bookListSectionElement = getBookListSectionElement();
         const navElement = getNavElement();
@@ -440,7 +445,7 @@ describe("App", () => {
     it("追加順に並び替える", async () => {
       const user = userEvent.setup();
 
-      render(<App />);
+      renderApp();
 
       await user.selectOptions(
         screen.getByRole("combobox", { name: "並び順" }),
@@ -460,7 +465,7 @@ describe("App", () => {
     it("評価順に並び替える", async () => {
       const user = userEvent.setup();
 
-      render(<App />);
+      renderApp();
 
       await user.selectOptions(
         screen.getByRole("combobox", { name: "並び順" }),
@@ -482,7 +487,7 @@ describe("App", () => {
     it("タイトル順に並び替える", async () => {
       const user = userEvent.setup();
 
-      render(<App />);
+      renderApp();
 
       await user.selectOptions(
         screen.getByRole("combobox", { name: "並び順" }),
@@ -504,7 +509,7 @@ describe("App", () => {
 
   it("ブラウザをリロードしても操作の結果が残る", async () => {
     const user = userEvent.setup();
-    const { unmount } = render(<App />);
+    const { unmount } = renderApp();
 
     const title = "本のタイトル";
     const author = "本の著者";
@@ -527,7 +532,7 @@ describe("App", () => {
     ).toBeInTheDocument();
 
     unmount();
-    render(<App />);
+    renderApp();
 
     const afterBookListSectionElement = getBookListSectionElement();
 

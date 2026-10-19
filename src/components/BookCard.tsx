@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useBooks } from "../contexts/BooksContext";
 import {
   BOOK_RATINGS,
   BOOK_STATUS_LABEL,
@@ -6,23 +7,8 @@ import {
   type BookRatingNumber,
 } from "../domain/book";
 
-export default function BookCard({
-  book,
-  editBook,
-  deleteBook,
-  advanceStatus,
-  toggleRating,
-}: {
-  book: Book;
-  editBook: ({
-    id,
-    title,
-    author,
-  }: Pick<Book, "id" | "title" | "author">) => void;
-  deleteBook: (id: string) => void;
-  advanceStatus: (id: string) => void;
-  toggleRating: (id: string, newRating: BookRatingNumber) => void;
-}) {
+export default function BookCard({ book }: { book: Book }) {
+  const { editBook, deleteBook, advanceStatus, toggleRating } = useBooks();
   const [isEditing, setIsEditing] = useState(false);
 
   const handleSubmit = (formData: FormData) => {

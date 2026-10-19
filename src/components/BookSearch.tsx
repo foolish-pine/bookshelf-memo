@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useBooks } from "../contexts/BooksContext";
 
 export type OpenLibraryDoc = {
   key: string;
@@ -79,11 +80,9 @@ type SearchResult =
       status: "error";
     };
 
-export default function BookSearch({
-  addBook,
-}: {
-  addBook: ({ title, author }: { title: string; author: string }) => void;
-}) {
+export default function BookSearch() {
+  const { addBook } = useBooks();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState<SearchResult>({
     status: "untouched",

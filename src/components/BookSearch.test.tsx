@@ -2,11 +2,16 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { setupServer } from "msw/node";
+import { BooksProvider } from "../contexts/BooksContext";
 import BookSearch, {
   isOpenLibrarySearchResponse,
   type OpenLibraryDoc,
   type OpenLibrarySearchResponse,
 } from "./BookSearch";
+
+const renderBookSearch = () => {
+  return render(<BookSearch />, { wrapper: BooksProvider });
+};
 
 describe("BookSearch", () => {
   const validOpenLibraryDoc = {
@@ -204,7 +209,7 @@ describe("BookSearch", () => {
       );
 
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      render(<BookSearch addBook={vi.fn()} />);
+      renderBookSearch();
 
       await user.type(
         screen.getByLabelText("本を検索"),
@@ -238,7 +243,7 @@ describe("BookSearch", () => {
       );
 
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      render(<BookSearch addBook={vi.fn()} />);
+      renderBookSearch();
 
       await user.type(
         screen.getByLabelText("本を検索"),
@@ -264,7 +269,7 @@ describe("BookSearch", () => {
       );
 
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      render(<BookSearch addBook={vi.fn()} />);
+      renderBookSearch();
 
       await user.type(
         screen.getByLabelText("本を検索"),
@@ -291,7 +296,7 @@ describe("BookSearch", () => {
       );
 
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      render(<BookSearch addBook={vi.fn()} />);
+      renderBookSearch();
 
       await user.type(
         screen.getByLabelText("本を検索"),
@@ -314,7 +319,7 @@ describe("BookSearch", () => {
       );
 
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      render(<BookSearch addBook={vi.fn()} />);
+      renderBookSearch();
 
       await user.type(
         screen.getByLabelText("本を検索"),

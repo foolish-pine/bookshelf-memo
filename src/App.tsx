@@ -1,18 +1,13 @@
-import { useReducer, useState } from "react";
+import { useState } from "react";
 import AddBookForm from "./components/AddBookForm";
 import BookList from "./components/BookList";
 import BookSearch from "./components/BookSearch";
+import { useBooks } from "./contexts/BooksContext";
 import {
   BOOK_STATUS_LABEL,
   BOOK_STATUSES,
-  type BookRatingNumber,
   type BookStatus,
-  isBooks,
 } from "./domain/book";
-import { bookReducer } from "./domain/bookReducer";
-import { useSaveToLocalStorage } from "./hooks/useSaveToLocalStorage";
-import { LOCAL_STORAGE_BOOKS_KEY } from "./storage";
-import { loadFromLocalStorage } from "./utils/loadFromLocalStorage";
 
 const BOOK_LIST_ORDER = ["addedAt", "rating", "title"] as const;
 type BookListOrder = (typeof BOOK_LIST_ORDER)[number];
@@ -27,10 +22,7 @@ const BOOK_LIST_ORDER_LABEL = {
 type StatusFilter = BookStatus | "all";
 
 export default function App() {
-  const [books, dispatch] = useReducer(bookReducer, [], () =>
-    loadFromLocalStorage(LOCAL_STORAGE_BOOKS_KEY, [], isBooks),
-  );
-  useSaveToLocalStorage(LOCAL_STORAGE_BOOKS_KEY, books);
+  const { books } = useBooks();
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const filteredBooks =
@@ -45,34 +37,6 @@ export default function App() {
 
   const [order, setOrder] = useState<BookListOrder>("addedAt");
   const [searchText, setSearchText] = useState("");
-
-  const addBook = ({ title, author }: { title: string; author: string }) => {
-    dispatch({ type: "add_book", id: crypto.randomUUID(), title, author });
-  };
-
-  const deleteBook = (id: string) => {
-    dispatch({ type: "delete_book", id });
-  };
-
-  const editBook = ({
-    id,
-    title,
-    author,
-  }: {
-    id: string;
-    title: string;
-    author: string;
-  }) => {
-    dispatch({ type: "edit_book", id, title, author });
-  };
-
-  const advanceStatus = (id: string) => {
-    dispatch({ type: "advance_book_status", id });
-  };
-
-  const toggleRating = (id: string, newRating: BookRatingNumber) => {
-    dispatch({ type: "toggle_book_rating", id, newRating });
-  };
 
   const searchedBooks = filteredBooks.filter((book) =>
     book.title.toLowerCase().includes(searchText.toLowerCase()),
@@ -117,11 +81,11 @@ export default function App() {
           <h2 className="section-title">本を追加</h2>
           <div className="subsection">
             <h3 className="subsection-title">手入力で追加</h3>
-            <AddBookForm addBook={addBook} />
+            <AddBookForm />
           </div>
           <div className="subsection">
             <h3 className="subsection-title">Open Library で探して追加</h3>
-            <BookSearch addBook={addBook} />
+            <BookSearch />
           </div>
         </section>
         <div className="toolbar card">
@@ -191,13 +155,7 @@ export default function App() {
             <p className="empty">検索ワードを含む本はありません。</p>
           )}
           {filteredBooks.length !== 0 && searchedBooks.length !== 0 && (
-            <BookList
-              books={sortedBooks}
-              editBook={editBook}
-              deleteBook={deleteBook}
-              advanceStatus={advanceStatus}
-              toggleRating={toggleRating}
-            />
+            <BookList books={sortedBooks} />
           )}
         </section>
       </main>

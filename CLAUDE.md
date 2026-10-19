@@ -70,7 +70,7 @@ Claude はステップ完了時にここを更新する。
   - [x] **16-4: localStorage の読み込み** — データなし・壊れた JSON・形が違うデータで初期値が返るテスト。テスト間の後片付け（2026-10-15 完了。getItem の例外は vi.stubGlobal で localStorage ごと差し替え、afterEach で戻してから clear）
   - [x] **16-5: コンポーネント** — ユーザー操作を起点にした振る舞いのテストを2つ以上（2026-10-17 完了。App を描画する結合テストで追加・削除を確認。一覧に見出し「本一覧」を付け、aria-labelledby は使わず closest("section") で範囲を絞る。入力前に user.clear で user-event の入力値の記録を消す）
   - [x] **16-6: BookSearch（任意）** — `fetch` をモックし、成功・0件・エラーの表示をテストする（2026-10-18 完了。MSW で通信を差し替え、成功・0件・サーバーエラー・不正なレスポンス・通信エラーを確認。デバウンスはフェイクタイマーで進める。isOpenLibrarySearchResponse の単体テストで author_name の判定漏れを見つけて修正）
-- [ ] **Step 17: Context で props の受け渡しをなくす** — reducer と Context を組み合わせ、操作関数の props バケツリレーを解消する。Step 16 のテストが通ることを確認する
+- [x] **Step 17: Context で props の受け渡しをなくす** — reducer と Context を組み合わせ、操作関数の props バケツリレーを解消する。Step 16 のテストが通ることを確認する（2026-10-19 完了。BooksContext に本の state・操作・localStorage の読み書きをまとめ、Provider は main.tsx に置く。絞り込み・検索・並び順は App の state のまま。テストは renderApp / renderBookSearch で Provider を包む）
 
 ## 詰まったときの対応
 
