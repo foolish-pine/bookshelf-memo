@@ -72,6 +72,22 @@ Claude はステップ完了時にここを更新する。
   - [x] **16-6: BookSearch（任意）** — `fetch` をモックし、成功・0件・エラーの表示をテストする（2026-10-18 完了。MSW で通信を差し替え、成功・0件・サーバーエラー・不正なレスポンス・通信エラーを確認。デバウンスはフェイクタイマーで進める。isOpenLibrarySearchResponse の単体テストで author_name の判定漏れを見つけて修正）
 - [x] **Step 17: Context で props の受け渡しをなくす** — reducer と Context を組み合わせ、操作関数の props バケツリレーを解消する。Step 16 のテストが通ることを確認する（2026-10-19 完了。BooksContext に本の state・操作・localStorage の読み書きをまとめ、Provider は main.tsx に置く。絞り込み・検索・並び順は App の state のまま。テストは renderApp / renderBookSearch で Provider を包む）
 
+### 応用ステップ（React の機能と周辺ライブラリ）
+各ステップで、既存のテストが通ることを確認し、追加した機能にはテストを書く。
+- [ ] **Step 18: DOM を参照する** — 「編集」を押したらタイトルの入力欄にフォーカスを当てる（`useRef`、React 19 の props としての `ref`）
+- [ ] **Step 19: アクセシビリティの改善** — 星のボタンに何点かの名前を付け、選択中のタブの状態を支援技術に伝え、ラベルと入力欄を id で結び付ける。アクセシビリティの問題をテストで自動検出する（`useId`、`aria-*`、vitest-axe）
+- [ ] **Step 20: 確認ダイアログ** — 削除の前に確認ダイアログを出す。Esc で閉じ、閉じたら元のボタンにフォーカスを戻す（`createPortal`、`useRef` によるフォーカス管理）
+- [ ] **Step 21: 描画の失敗に備える** — 1冊の表示で例外が起きても、ほかの本と画面全体は表示し続ける（Error Boundary）
+- [ ] **Step 22: タブ間の同期** — 別のタブで本を変更したら、こちらのタブにも反映する（`useSyncExternalStore`）
+- [ ] **Step 23: フォームの新機能** — 保存に時間がかかる想定で、送信中の表示と楽観的な更新を入れる（`useActionState`、`useFormStatus`、`useOptimistic`）
+- [ ] **Step 24: パフォーマンス** — 本を数千冊にして計測し、もたつく所を改善する。長い一覧は見えている分だけ描画する（Profiler、`memo`、`useMemo`、`useCallback`、`useDeferredValue`、`useTransition`、React Compiler、TanStack Virtual）
+- [ ] **Step 25: コード分割** — 検索機能を使うときに読み込む（`lazy`、`Suspense`）
+- [ ] **Step 26: ルーティング** — 絞り込み・検索語・並び順を URL に持たせ、本の詳細ページを作る。詳細ページを切り替えたときに state を初期化する（React Router、`key` による state のリセット）
+- [ ] **Step 27: スキーマによる検証** — `isBooks` と `isOpenLibrarySearchResponse` をスキーマで書き直し、型もスキーマから作る（Zod）
+- [ ] **Step 28: サーバーの状態を扱う** — `BookSearch` の通信を置き換え、キャッシュと再試行を使う（TanStack Query、`useSuspenseQuery`）
+- [ ] **Step 29: 状態管理ライブラリとの比較** — 別のブランチで `BooksContext` を置き換え、Profiler で再描画を比べてから採用を決める（Zustand、セレクタ）
+- [ ] **Step 30: E2E テスト** — 本物のブラウザで、追加・編集・リロード・タブ間の同期の流れを確かめる（Playwright）
+
 ## 詰まったときの対応
 
 答えではなく段階的に支援する。1段階ずつ出し、足りなければ次へ進む。
@@ -104,6 +120,8 @@ Claude はステップ完了時にここを更新する。
 
 - React 19 / TypeScript（strict）/ Vite
 - 状態管理ライブラリ・UIライブラリは入れない（素の React で練習する）
+  - 例外：応用ステップでは、そのステップで指定したライブラリだけ使ってよい（vitest-axe、TanStack Virtual、React Router、Zod、TanStack Query、Zustand、Playwright）
+  - テスト用の MSW は Step 16-6 で導入済み
 - Linter / Formatter は Biome（`biome.json`）。ESLint / Prettier / Stylelint は使わない
 
 ## コマンド
