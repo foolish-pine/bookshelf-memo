@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import nodeConsole from "node:console";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { setupServer } from "msw/node";
@@ -188,6 +189,14 @@ describe("BookSearch", () => {
     ];
     const server = setupServer(...handlers);
 
+    const searchFor = async (
+      user: ReturnType<typeof userEvent.setup>,
+      query: string,
+    ) => {
+      await user.type(screen.getByLabelText("本を検索"), query);
+      await act(() => vi.advanceTimersByTimeAsync(500));
+    };
+
     beforeEach(() => {
       vi.useFakeTimers({
         toFake: ["setTimeout", "clearTimeout"],
@@ -198,6 +207,7 @@ describe("BookSearch", () => {
     afterEach(() => {
       vi.useRealTimers();
       server.resetHandlers();
+      vi.restoreAllMocks();
     });
     afterAll(() => server.close());
 
@@ -211,11 +221,7 @@ describe("BookSearch", () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderBookSearch();
 
-      await user.type(
-        screen.getByLabelText("本を検索"),
-        validOpenLibraryDoc.title,
-      );
-      await vi.advanceTimersByTimeAsync(500);
+      await searchFor(user, validOpenLibraryDoc.title);
 
       expect(
         await screen.findByText(`タイトル: ${validOpenLibraryDoc.title}`),
@@ -245,11 +251,7 @@ describe("BookSearch", () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderBookSearch();
 
-      await user.type(
-        screen.getByLabelText("本を検索"),
-        validOpenLibraryDoc.title,
-      );
-      await vi.advanceTimersByTimeAsync(500);
+      await searchFor(user, validOpenLibraryDoc.title);
 
       expect(
         await screen.findByText(
@@ -259,6 +261,13 @@ describe("BookSearch", () => {
     });
 
     it("検索に失敗したとき、エラーテキストが表示される", async () => {
+      // happy-dom が失敗したリクエストを Node 本来の console に出力するため、
+      // グローバルの console とは別に抑制する（Vitest の内部の作りに依存）
+      vi.spyOn(nodeConsole, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
       server.use(
         http.get("https://openlibrary.org/search.json", () =>
           HttpResponse.json(
@@ -271,20 +280,24 @@ describe("BookSearch", () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderBookSearch();
 
-      await user.type(
-        screen.getByLabelText("本を検索"),
-        validOpenLibraryDoc.title,
-      );
-      await vi.advanceTimersByTimeAsync(500);
+      await searchFor(user, validOpenLibraryDoc.title);
 
       expect(
         await screen.findByText(
           "エラーが発生しました。時間をおいてもう一度お試しください。",
         ),
       ).toBeInTheDocument();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "エラーが発生しました:",
+        expect.any(Error),
+      );
     });
 
     it("レスポンスが不正な形式のとき、エラーテキストが表示される", async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
       server.use(
         http.get("https://openlibrary.org/search.json", () =>
           HttpResponse.json({
@@ -298,20 +311,25 @@ describe("BookSearch", () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderBookSearch();
 
-      await user.type(
-        screen.getByLabelText("本を検索"),
-        validOpenLibraryDoc.title,
-      );
-      await vi.advanceTimersByTimeAsync(500);
+      await searchFor(user, validOpenLibraryDoc.title);
 
       expect(
         await screen.findByText(
           "エラーが発生しました。時間をおいてもう一度お試しください。",
         ),
       ).toBeInTheDocument();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "エラーが発生しました:",
+        expect.any(Error),
+      );
     });
 
     it("通信エラーのとき、エラーテキストが表示される", async () => {
+      vi.spyOn(nodeConsole, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
       server.use(
         http.get("https://openlibrary.org/search.json", () =>
           HttpResponse.error(),
@@ -321,17 +339,17 @@ describe("BookSearch", () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderBookSearch();
 
-      await user.type(
-        screen.getByLabelText("本を検索"),
-        validOpenLibraryDoc.title,
-      );
-      await vi.advanceTimersByTimeAsync(500);
+      await searchFor(user, validOpenLibraryDoc.title);
 
       expect(
         await screen.findByText(
           "エラーが発生しました。時間をおいてもう一度お試しください。",
         ),
       ).toBeInTheDocument();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "エラーが発生しました:",
+        expect.any(Error),
+      );
     });
   });
 });
