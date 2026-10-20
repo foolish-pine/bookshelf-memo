@@ -227,7 +227,7 @@ describe("App", () => {
       const user = userEvent.setup();
 
       const targetBook = createBook();
-      const anotherBook = createBook();
+      const anotherBook = createBook({ status: "unread", rating: null });
       setupBooksInLocalStorage([targetBook, anotherBook]);
       renderApp();
 
@@ -254,6 +254,9 @@ describe("App", () => {
       expect(
         within(targetBookElement).getByLabelText("タイトル"),
       ).not.toHaveFocus();
+      expect(
+        within(anotherBookElement).getAllByRole("button", { name: /☆|★/ })[3],
+      ).toHaveFocus();
     });
   });
 
