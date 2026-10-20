@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import AddBookForm from "./components/AddBookForm";
 import BookList from "./components/BookList";
 import BookSearch from "./components/BookSearch";
@@ -23,6 +23,7 @@ type StatusFilter = BookStatus | "all";
 
 export default function App() {
   const { books } = useBooks();
+  const id = useId();
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const filteredBooks =
@@ -94,8 +95,9 @@ export default function App() {
               <li>
                 <button
                   type="button"
-                  className={statusFilter === "all" ? "tab is-active" : "tab"}
+                  className="tab"
                   onClick={() => setStatusFilter("all")}
+                  aria-pressed={statusFilter === "all"}
                 >
                   すべて
                 </button>
@@ -104,8 +106,9 @@ export default function App() {
                 <li key={key}>
                   <button
                     type="button"
-                    className={statusFilter === key ? "tab is-active" : "tab"}
+                    className="tab"
                     onClick={() => setStatusFilter(key)}
+                    aria-pressed={statusFilter === key}
                   >
                     {BOOK_STATUS_LABEL[key]}
                   </button>
@@ -114,18 +117,25 @@ export default function App() {
             </ul>
           </nav>
           <div className="row">
-            <label className="field field-label">
-              タイトルで検索
+            <div className="field">
+              <label htmlFor={`${id}-search`} className="field-label">
+                タイトルで検索
+              </label>
               <input
+                id={`${id}-search`}
                 className="input"
                 type="text"
+                name="search"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
               />
-            </label>
-            <label className="field field-label field-narrow">
-              並び順
+            </div>
+            <div className="field field-narrow">
+              <label htmlFor={`${id}-order`} className="field-label">
+                並び順
+              </label>
               <select
+                id={`${id}-order`}
                 className="select"
                 name="order"
                 value={order}
@@ -137,7 +147,7 @@ export default function App() {
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
           </div>
         </div>
         <section className="section">

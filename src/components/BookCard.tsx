@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useBooks } from "../contexts/BooksContext";
 import {
   BOOK_RATINGS,
@@ -14,6 +14,7 @@ const focusOnMount = (el: HTMLInputElement | null) => {
 export default function BookCard({ book }: { book: Book }) {
   const { editBook, deleteBook, advanceStatus, toggleRating } = useBooks();
   const [isEditing, setIsEditing] = useState(false);
+  const id = useId();
 
   const handleSubmit = (formData: FormData) => {
     const title = formData.get("title");
@@ -44,9 +45,12 @@ export default function BookCard({ book }: { book: Book }) {
     <div className="list-item is-vertical">
       {isEditing ? (
         <form action={handleSubmit} className="form">
-          <label className="field field-label">
-            タイトル
+          <div className="field">
+            <label htmlFor={`${id}-title`} className="field-label">
+              タイトル
+            </label>
             <input
+              id={`${id}-title`}
               className="input"
               type="text"
               name="title"
@@ -54,17 +58,20 @@ export default function BookCard({ book }: { book: Book }) {
               ref={focusOnMount}
               required
             />
-          </label>
-          <label className="field field-label">
-            著者
+          </div>
+          <div className="field">
+            <label htmlFor={`${id}-author`} className="field-label">
+              著者
+            </label>
             <input
+              id={`${id}-author`}
               className="input"
               type="text"
               name="author"
               defaultValue={book.author}
               required
             />
-          </label>
+          </div>
           <button type="submit" className="btn btn-primary btn-sm">
             保存
           </button>
@@ -92,15 +99,24 @@ export default function BookCard({ book }: { book: Book }) {
         </button>
       </p>
       <p className="item-meta stars stars-glyph">
-        評価:{" "}
+        <span className="visually-hidden">
+          評価: {book.rating === null ? "未評価" : `${book.rating}点`}
+        </span>
+        <span aria-hidden="true">評価: </span>
         {BOOK_RATINGS.map((rating) => (
           <button
             key={rating}
             type="button"
             className="star"
+            aria-pressed={book.rating === rating}
             onClick={() => handleToggleRating(rating)}
           >
-            {book.rating !== null && book.rating >= rating ? "★" : "☆"}
+            <span className="visually-hidden">{rating}点</span>
+            {book.rating !== null && book.rating >= rating ? (
+              <span aria-hidden="true">★</span>
+            ) : (
+              <span aria-hidden="true">☆</span>
+            )}
           </button>
         ))}
       </p>

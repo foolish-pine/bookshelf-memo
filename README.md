@@ -56,7 +56,7 @@ npm run dev
 | 操作バー | `toolbar`（絞り込み・検索・並び順をまとめる。`card` と併用） |
 | フォーム | `form` `field` `field-label` `field-error` `input` `select` `textarea` / エラー時 `is-invalid` / 横並びで幅を抑える `field-narrow` |
 | ボタン | `btn` + `btn-primary` `btn-secondary` `btn-ghost` `btn-danger`、小さく `btn-sm` |
-| タブ | `tabs` > `tab`、選択中 `is-active`（`ul.tabs` > `li` > `button.tab` でも可） |
+| タブ | `tabs` > `tab`、選択中は `aria-pressed="true"` で表す（クラスは不要。`ul.tabs` > `li` > `button.tab` でも可） |
 | 統計 | `stats` > `stat` > `stat-label` `stat-value`（`dl` / `dt` / `dd` 想定） |
 | 1行の集計テキスト | `summary` |
 | リスト | `list` > `list-item`（読了時 `is-done`、中身を縦に並べる `is-vertical`）> `item-body` > `item-title` `item-meta`、操作 `item-actions` |
@@ -64,6 +64,7 @@ npm run dev
 | バッジ | `badge` + `badge-unread` `badge-reading` `badge-read`（`badge-done` も同じ見た目） |
 | 星評価 | `stars` > `star`、塗り `is-filled`。★/☆ の文字で塗りを表すときは `stars` に `stars-glyph` を足す（全星が星色になる） |
 | メッセージ | `notice`、エラー `notice-error` |
+| 視覚的に隠す | `visually-hidden`（画面には表示せず、スクリーンリーダーには読ませる） |
 
 ### マークアップ例（構造のみ）
 ```html

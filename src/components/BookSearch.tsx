@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useBooks } from "../contexts/BooksContext";
 
 export type OpenLibraryDoc = {
@@ -82,11 +82,11 @@ type SearchResult =
 
 export default function BookSearch() {
   const { addBook } = useBooks();
-
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState<SearchResult>({
     status: "untouched",
   });
+  const id = useId();
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -124,9 +124,12 @@ export default function BookSearch() {
 
   return (
     <>
-      <label className="field field-label">
-        本を検索
+      <div className="field">
+        <label htmlFor={`${id}-keyword`} className="field-label">
+          本を検索
+        </label>
         <input
+          id={`${id}-keyword`}
           className="input"
           type="text"
           name="keyword"
@@ -140,7 +143,7 @@ export default function BookSearch() {
             }
           }}
         />
-      </label>
+      </div>
       {searchResult.status === "pending" && (
         <p className="text-muted">検索中...</p>
       )}

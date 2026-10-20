@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import axe from "axe-core";
 import App from "./App.tsx";
 import { BooksProvider } from "./contexts/BooksContext.tsx";
 import {
@@ -65,6 +66,71 @@ afterEach(() => {
 });
 
 describe("App", () => {
+  describe("アクセシビリティ", () => {
+    async function checkA11y(container: Element) {
+      const results = await axe.run(container, {
+        rules: {
+          // jsdom / happy-dom は描画しないため判定できない
+          "color-contrast": { enabled: false },
+        },
+      });
+
+      const messages = results.violations.map((v) => {
+        const targets = v.nodes
+          .map((n) => `  - ${n.target.join(" ")}`)
+          .join("\n");
+        return `[${v.impact}] ${v.id}: ${v.help}\n${targets}\n  ${v.helpUrl}`;
+      });
+
+      expect(messages, messages.join("\n\n")).toEqual([]);
+    }
+
+    it("本の編集中でないとき、アクセシビリティ違反がない", async () => {
+      setupBooksInLocalStorage([
+        createBook({
+          status: "unread",
+          rating: null,
+        }),
+        createBook({
+          status: "reading",
+          rating: 3,
+        }),
+      ]);
+      const { container } = renderApp();
+
+      await checkA11y(container);
+    });
+
+    it("本を編集中のとき、アクセシビリティ違反がない", async () => {
+      const user = userEvent.setup();
+
+      const targetBook = createBook({
+        status: "unread",
+        rating: null,
+      });
+      setupBooksInLocalStorage([
+        targetBook,
+        createBook({
+          status: "reading",
+          rating: 3,
+        }),
+      ]);
+      const { container } = renderApp();
+
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
+
+      await user.click(
+        within(targetBookElement).getByRole("button", { name: "編集" }),
+      );
+
+      await checkA11y(container);
+    });
+  });
+
   describe("追加フォームからの本の追加", () => {
     it("本を追加できる", async () => {
       const user = userEvent.setup();
@@ -248,14 +314,14 @@ describe("App", () => {
         within(anotherBookElement).getByRole("button", { name: "未読" }),
       );
       await user.click(
-        within(anotherBookElement).getAllByRole("button", { name: /☆|★/ })[3],
+        within(anotherBookElement).getByRole("button", { name: "3点" }),
       );
 
       expect(
         within(targetBookElement).getByLabelText("タイトル"),
       ).not.toHaveFocus();
       expect(
-        within(anotherBookElement).getAllByRole("button", { name: /☆|★/ })[3],
+        within(anotherBookElement).getByRole("button", { name: "3点" }),
       ).toHaveFocus();
     });
   });
@@ -298,8 +364,8 @@ describe("App", () => {
   it("本の評価を更新できる", async () => {
     const user = userEvent.setup();
 
-    const targetBook = createBook();
-    const anotherBook = createBook();
+    const targetBook = createBook({ rating: null });
+    const anotherBook = createBook({ rating: null });
     setupBooksInLocalStorage([targetBook, anotherBook]);
     renderApp();
 
@@ -314,19 +380,44 @@ describe("App", () => {
     );
 
     expect(
-      within(targetBookElement).queryAllByRole("button", { name: "★" }),
+      within(targetBookElement).queryAllByRole("button", {
+        name: /点$/,
+        pressed: true,
+      }),
     ).toHaveLength(0);
+    expect(
+      within(targetBookElement).getByText("評価: 未評価"),
+    ).toBeInTheDocument();
 
     await user.click(
-      within(targetBookElement).getAllByRole("button", { name: /☆|★/ })[3],
+      within(targetBookElement).getByRole("button", { name: "3点" }),
     );
 
     expect(
-      within(targetBookElement).getAllByRole("button", { name: "★" }),
-    ).toHaveLength(4);
+      within(targetBookElement).getByRole("button", {
+        name: "3点",
+        pressed: true,
+      }),
+    ).toBeInTheDocument();
     expect(
-      within(anotherBookElement).queryAllByRole("button", { name: "★" }),
+      within(targetBookElement).getAllByRole("button", {
+        name: /点$/,
+        pressed: true,
+      }),
+    ).toHaveLength(1);
+    expect(
+      within(targetBookElement).getByText("評価: 3点"),
+    ).toBeInTheDocument();
+
+    expect(
+      within(anotherBookElement).queryAllByRole("button", {
+        name: /点$/,
+        pressed: true,
+      }),
     ).toHaveLength(0);
+    expect(
+      within(anotherBookElement).getByText("評価: 未評価"),
+    ).toBeInTheDocument();
   });
 
   describe("タイトル検索機能", () => {
@@ -479,6 +570,28 @@ describe("App", () => {
         ).toHaveLength(count);
       },
     );
+
+    it("選択中のタブが aria-pressed で伝達される", async () => {
+      const user = userEvent.setup();
+
+      renderApp();
+
+      const navElement = getNavElement();
+
+      await user.click(
+        within(navElement).getByRole("button", { name: "未読" }),
+      );
+
+      expect(
+        within(navElement).getByRole("button", {
+          name: "すべて",
+          pressed: false,
+        }),
+      ).toBeInTheDocument();
+      expect(
+        within(navElement).getByRole("button", { name: "未読", pressed: true }),
+      ).toBeInTheDocument();
+    });
   });
 
   describe("本の並び順の変更", () => {
