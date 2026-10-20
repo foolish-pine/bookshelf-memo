@@ -148,55 +148,113 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
-  it("本のタイトルと著者を編集できる", async () => {
-    const user = userEvent.setup();
+  describe("本の編集", () => {
+    it("本のタイトルと著者を編集できる", async () => {
+      const user = userEvent.setup();
 
-    const targetBook = createBook();
-    const anotherBook = createBook();
-    setupBooksInLocalStorage([targetBook, anotherBook]);
-    renderApp();
+      const targetBook = createBook();
+      const anotherBook = createBook();
+      setupBooksInLocalStorage([targetBook, anotherBook]);
+      renderApp();
 
-    const bookListSectionElement = getBookListSectionElement();
-    const targetBookElement = getTargetBookElement(
-      bookListSectionElement,
-      targetBook.title,
-    );
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
 
-    await user.click(
-      within(targetBookElement).getByRole("button", { name: "編集" }),
-    );
+      await user.click(
+        within(targetBookElement).getByRole("button", { name: "編集" }),
+      );
 
-    const newTitle = "新しいタイトル";
-    const titleInput = within(targetBookElement).getByLabelText("タイトル");
-    const newAuthor = "新しい著者";
-    const authorInput = within(targetBookElement).getByLabelText("著者");
+      const newTitle = "新しいタイトル";
+      const titleInput = within(targetBookElement).getByLabelText("タイトル");
+      const newAuthor = "新しい著者";
+      const authorInput = within(targetBookElement).getByLabelText("著者");
 
-    await user.clear(titleInput);
-    await user.type(titleInput, newTitle);
-    await user.clear(authorInput);
-    await user.type(authorInput, newAuthor);
-    await user.click(
-      within(targetBookElement).getByRole("button", { name: "保存" }),
-    );
+      await user.clear(titleInput);
+      await user.type(titleInput, newTitle);
+      await user.clear(authorInput);
+      await user.type(authorInput, newAuthor);
+      await user.click(
+        within(targetBookElement).getByRole("button", { name: "保存" }),
+      );
 
-    expect(
-      within(bookListSectionElement).queryByText(targetBook.title),
-    ).not.toBeInTheDocument();
-    expect(
-      within(bookListSectionElement).queryByText(targetBook.author),
-    ).not.toBeInTheDocument();
-    expect(
-      within(bookListSectionElement).getByText(newTitle),
-    ).toBeInTheDocument();
-    expect(
-      within(bookListSectionElement).getByText(newAuthor),
-    ).toBeInTheDocument();
-    expect(
-      within(bookListSectionElement).getByText(anotherBook.title),
-    ).toBeInTheDocument();
-    expect(
-      within(bookListSectionElement).getByText(anotherBook.author),
-    ).toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).queryByText(targetBook.title),
+      ).not.toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).queryByText(targetBook.author),
+      ).not.toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).getByText(newTitle),
+      ).toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).getByText(newAuthor),
+      ).toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).getByText(anotherBook.title),
+      ).toBeInTheDocument();
+      expect(
+        within(bookListSectionElement).getByText(anotherBook.author),
+      ).toBeInTheDocument();
+    });
+
+    it("編集中になったとき、本のタイトル欄にフォーカスが移動する", async () => {
+      const user = userEvent.setup();
+
+      const targetBook = createBook();
+      const anotherBook = createBook();
+      setupBooksInLocalStorage([targetBook, anotherBook]);
+      renderApp();
+
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
+
+      await user.click(
+        within(targetBookElement).getByRole("button", { name: "編集" }),
+      );
+
+      expect(
+        within(targetBookElement).getByLabelText("タイトル"),
+      ).toHaveFocus();
+    });
+
+    it("編集中、他の本のステータスや評価を変更してもタイトルにフォーカスが移動しない", async () => {
+      const user = userEvent.setup();
+
+      const targetBook = createBook();
+      const anotherBook = createBook();
+      setupBooksInLocalStorage([targetBook, anotherBook]);
+      renderApp();
+
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
+      const anotherBookElement = getTargetBookElement(
+        bookListSectionElement,
+        anotherBook.title,
+      );
+
+      await user.click(
+        within(targetBookElement).getByRole("button", { name: "編集" }),
+      );
+      await user.click(
+        within(anotherBookElement).getByRole("button", { name: "未読" }),
+      );
+      await user.click(
+        within(anotherBookElement).getAllByRole("button", { name: /☆|★/ })[3],
+      );
+
+      expect(
+        within(targetBookElement).getByLabelText("タイトル"),
+      ).not.toHaveFocus();
+    });
   });
 
   it("本のステータスを更新できる", async () => {

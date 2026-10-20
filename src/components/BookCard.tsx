@@ -7,6 +7,10 @@ import {
   type BookRatingNumber,
 } from "../domain/book";
 
+const focusOnMount = (el: HTMLInputElement | null) => {
+  el?.focus();
+};
+
 export default function BookCard({ book }: { book: Book }) {
   const { editBook, deleteBook, advanceStatus, toggleRating } = useBooks();
   const [isEditing, setIsEditing] = useState(false);
@@ -47,6 +51,7 @@ export default function BookCard({ book }: { book: Book }) {
               type="text"
               name="title"
               defaultValue={book.title}
+              ref={focusOnMount}
               required
             />
           </label>
