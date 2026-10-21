@@ -292,6 +292,14 @@ textarea {
   padding: 4px 10px;
   font-size: 0.8rem;
 }
+/* 取り消せない操作の確定ボタン（確認ダイアログの「削除する」など） */
+.btn-danger-fill {
+  background: var(--danger);
+  color: var(--surface);
+}
+.btn-danger-fill:hover:not(:disabled) {
+  opacity: 0.88;
+}
 
 /* ---------- タブ / フィルタ ---------- */
 .tabs {
@@ -480,6 +488,42 @@ button.badge {
 }
 .star:hover {
   transform: scale(1.15);
+}
+
+/* ---------- ダイアログ ---------- */
+/* showModal() で開く <dialog>。見出し・本文は横いっぱい、ボタンは右寄せで横に並べる */
+.dialog {
+  width: min(400px, calc(100% - 32px));
+  padding: 20px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.2);
+}
+/* display を常に指定すると閉じていても表示されるので、開いているときだけ grid にする */
+.dialog[open] {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+}
+.dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+.dialog-title {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.dialog-text {
+  grid-column: 1 / -1;
+  margin: 0 0 12px;
+  overflow-wrap: anywhere;
+}
+/* 最初のボタンを2列目に置き、ボタンの組を右寄せにする */
+.dialog > .btn:first-of-type {
+  grid-column: 2;
 }
 
 /* ---------- メッセージ ---------- */

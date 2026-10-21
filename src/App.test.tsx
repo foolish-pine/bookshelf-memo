@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import userEvent, { type UserEvent } from "@testing-library/user-event";
 import axe from "axe-core";
 import App from "./App.tsx";
 import { BooksProvider } from "./contexts/BooksContext.tsx";
@@ -61,6 +61,21 @@ const getTargetBookElement = (
   return targetBook;
 };
 
+const showDeleteModalElement = async (
+  user: UserEvent,
+  targetBookElement: HTMLElement,
+) => {
+  await user.click(
+    within(targetBookElement).getByRole("button", { name: "削除" }),
+  );
+
+  const deleteModalElement = within(targetBookElement).getByRole("dialog", {
+    name: "本の削除",
+  });
+
+  return deleteModalElement;
+};
+
 afterEach(() => {
   localStorage.clear();
 });
@@ -85,17 +100,48 @@ describe("App", () => {
       expect(messages, messages.join("\n\n")).toEqual([]);
     }
 
-    it("本の編集中でないとき、アクセシビリティ違反がない", async () => {
+    it("削除確認モーダルを表示中のとき、アクセシビリティ違反がない", async () => {
+      const user = userEvent.setup();
+
+      const targetBook = createBook({
+        status: "unread",
+        rating: null,
+      });
+
       setupBooksInLocalStorage([
-        createBook({
-          status: "unread",
-          rating: null,
-        }),
+        targetBook,
         createBook({
           status: "reading",
           rating: 3,
         }),
       ]);
+
+      const { container } = renderApp();
+
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
+      await showDeleteModalElement(user, targetBookElement);
+
+      await checkA11y(container);
+    });
+
+    it("本の編集中でないとき、アクセシビリティ違反がない", async () => {
+      const targetBook = createBook({
+        status: "unread",
+        rating: null,
+      });
+
+      setupBooksInLocalStorage([
+        targetBook,
+        createBook({
+          status: "reading",
+          rating: 3,
+        }),
+      ]);
+
       const { container } = renderApp();
 
       await checkA11y(container);
@@ -108,6 +154,7 @@ describe("App", () => {
         status: "unread",
         rating: null,
       });
+
       setupBooksInLocalStorage([
         targetBook,
         createBook({
@@ -115,6 +162,7 @@ describe("App", () => {
           rating: 3,
         }),
       ]);
+
       const { container } = renderApp();
 
       const bookListSectionElement = getBookListSectionElement();
@@ -186,32 +234,70 @@ describe("App", () => {
     });
   });
 
-  it("本を削除できる", async () => {
-    const user = userEvent.setup();
+  describe("本の削除", () => {
+    it("削除ボタンをクリックすると確認のモーダルが表示され、その削除ボタンをクリックすると本を削除できる", async () => {
+      const user = userEvent.setup();
 
-    const targetBook = createBook();
-    const anotherBook = createBook();
-    setupBooksInLocalStorage([targetBook, anotherBook]);
+      const targetBook = createBook();
+      const anotherBook = createBook();
+      setupBooksInLocalStorage([targetBook, anotherBook]);
 
-    renderApp();
+      renderApp();
 
-    const bookListSectionElement = getBookListSectionElement();
-    const targetBookElement = getTargetBookElement(
-      bookListSectionElement,
-      targetBook.title,
-    );
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
+      const anotherBookElement = getTargetBookElement(
+        bookListSectionElement,
+        anotherBook.title,
+      );
 
-    await user.click(
-      within(targetBookElement).getByRole("button", { name: "削除" }),
-    );
+      const deleteModalElement = await showDeleteModalElement(
+        user,
+        targetBookElement,
+      );
 
-    expect(targetBookElement).not.toBeInTheDocument();
-    expect(
-      within(bookListSectionElement).getByText(anotherBook.title),
-    ).toBeInTheDocument();
-    expect(
-      within(bookListSectionElement).getByText(anotherBook.author),
-    ).toBeInTheDocument();
+      await user.click(
+        within(deleteModalElement).getByRole("button", { name: "削除する" }),
+      );
+
+      expect(targetBookElement).not.toBeInTheDocument();
+      expect(anotherBookElement).toBeInTheDocument();
+    });
+
+    it("削除ボタンをクリックすると確認のモーダルが表示され、そのキャンセルボタンをクリックするとモーダルが閉じられる", async () => {
+      const user = userEvent.setup();
+
+      const targetBook = createBook();
+      const anotherBook = createBook();
+      setupBooksInLocalStorage([targetBook, anotherBook]);
+
+      renderApp();
+
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
+      const anotherBookElement = getTargetBookElement(
+        bookListSectionElement,
+        anotherBook.title,
+      );
+      const deleteModalElement = await showDeleteModalElement(
+        user,
+        targetBookElement,
+      );
+
+      await user.click(
+        within(deleteModalElement).getByRole("button", { name: "キャンセル" }),
+      );
+
+      expect(deleteModalElement).not.toBeVisible();
+      expect(targetBookElement).toBeInTheDocument();
+      expect(anotherBookElement).toBeInTheDocument();
+    });
   });
 
   describe("本の編集", () => {

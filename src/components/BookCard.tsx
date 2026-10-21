@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useBooks } from "../contexts/BooksContext";
 import {
   BOOK_RATINGS,
@@ -14,6 +14,8 @@ const focusOnMount = (el: HTMLInputElement | null) => {
 export default function BookCard({ book }: { book: Book }) {
   const { editBook, deleteBook, advanceStatus, toggleRating } = useBooks();
   const [isEditing, setIsEditing] = useState(false);
+  const deleteModalRef = useRef<HTMLDialogElement>(null);
+  const deleteModalCancelButtonRef = useRef<HTMLButtonElement>(null);
   const id = useId();
 
   const handleSubmit = (formData: FormData) => {
@@ -27,6 +29,15 @@ export default function BookCard({ book }: { book: Book }) {
     editBook({ id: book.id, title, author });
 
     setIsEditing(false);
+  };
+
+  const openDeleteModal = () => {
+    deleteModalRef.current?.showModal();
+    deleteModalCancelButtonRef.current?.focus();
+  };
+
+  const closeDeleteModal = () => {
+    deleteModalRef.current?.close();
   };
 
   const handleDelete = () => {
@@ -134,10 +145,35 @@ export default function BookCard({ book }: { book: Book }) {
           <button
             type="button"
             className="btn btn-danger btn-sm"
-            onClick={handleDelete}
+            onClick={openDeleteModal}
           >
             削除
           </button>
+          <dialog
+            ref={deleteModalRef}
+            className="dialog"
+            aria-labelledby={`${id}-delete-modal`}
+          >
+            <h4 id={`${id}-delete-modal`} className="dialog-title">
+              本の削除
+            </h4>
+            <p className="dialog-text">{book.title} を削除しますか？</p>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={closeDeleteModal}
+              ref={deleteModalCancelButtonRef}
+            >
+              キャンセル
+            </button>
+            <button
+              type="button"
+              className="btn btn-danger-fill"
+              onClick={handleDelete}
+            >
+              削除する
+            </button>
+          </dialog>
         </>
       )}
     </div>
