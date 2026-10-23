@@ -49,10 +49,10 @@ const getBookListSectionElement = () => {
 const getNavElement = () => screen.getByRole("navigation");
 
 const getTargetBookElement = (
-  bookListSection: HTMLElement,
+  bookListSectionElement: HTMLElement,
   bookTitle: string,
 ) => {
-  const targetBook = within(bookListSection)
+  const targetBook = within(bookListSectionElement)
     .getAllByRole("listitem")
     .find((li) => within(li).queryByText(bookTitle));
 

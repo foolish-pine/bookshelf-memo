@@ -416,6 +416,21 @@ textarea {
   align-items: center;
   flex-shrink: 0;
 }
+/* 描画に失敗した本の代わりの表示 */
+.list-item.is-broken {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  color: var(--danger);
+  box-shadow: none;
+}
+.list-item.is-broken > .item-body {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.list-item.is-broken > .btn {
+  align-self: flex-end;
+}
 .list-item.is-vertical > .form {
   align-self: stretch;
 }

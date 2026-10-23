@@ -77,7 +77,7 @@ Claude はステップ完了時にここを更新する。
 - [x] **Step 18: DOM を参照する** — 「編集」を押したらタイトルの入力欄にフォーカスを当てる（`useRef`、React 19 の props としての `ref`）（2026-10-20 完了。モジュールのトップレベルに置いたコールバック ref で実装し、`useRef` と props としての `ref` は skip して Step 20 で練習する。編集中にほかの本を操作してもフォーカスが移らないことをテストで確認）
 - [x] **Step 19: アクセシビリティの改善** — 星のボタンに何点かの名前を付け、選択中のタブの状態を支援技術に伝え、ラベルと入力欄を id で結び付ける。アクセシビリティの問題をテストで自動検出する（`useId`、`aria-*`、axe-core）。vitest-axe はメンテナンスが止まっているため axe-core を直接使う（2026-10-20 完了。星は名前を「N点」で固定し、選択状態は aria-pressed で伝える。タブも aria-pressed にし、見た目は `.tab[aria-pressed="true"]` で当てて is-active をなくす。ラベルと入力欄は useId で結び付け、組を `div.field` で包む。axe-core の検査は本がある状態と編集中の状態で行い、color-contrast だけ無効にする）
 - [x] **Step 20: 確認ダイアログ** — 削除の前に確認ダイアログを出す。Esc で閉じ、閉じたら元のボタンにフォーカスを戻す（`createPortal`、`useRef` によるフォーカス管理）（2026-10-21 完了。ネイティブの `<dialog>` と `showModal()` で実装し、最前面への描画・背景の inert・Esc・フォーカスの戻りはブラウザに任せる。そのため `createPortal` は skip。開いたら「キャンセル」にフォーカスを当てる。削除後はフォーカスを移さない。happy-dom は `showModal()` の挙動を実装していないため、Esc とフォーカスの戻りは Step 30 の E2E で確かめる）
-- [ ] **Step 21: 描画の失敗に備える** — 1冊の表示で例外が起きても、ほかの本と画面全体は表示し続ける（Error Boundary）
+- [x] **Step 21: 描画の失敗に備える** — 1冊の表示で例外が起きても、ほかの本と画面全体は表示し続ける（Error Boundary）（2026-10-23 完了。react-error-boundary を使い、Error Boundary の自作は skip。BookList の map で1冊ずつ包み、fallbackRender で壊れた本を削除できるようにする。代わりの表示の削除は確認なし。例外は onError で console.error に記録。テストは BookList.test.tsx に分け、vi.mock で特定の id の BookCard だけ例外を投げる。削除の確認は App を描画して行う）
 - [ ] **Step 22: タブ間の同期** — 別のタブで本を変更したら、こちらのタブにも反映する（`useSyncExternalStore`）
 - [ ] **Step 23: フォームの新機能** — 保存に時間がかかる想定で、送信中の表示と楽観的な更新を入れる（`useActionState`、`useFormStatus`、`useOptimistic`）
 - [ ] **Step 24: パフォーマンス** — 本を数千冊にして計測し、もたつく所を改善する。長い一覧は見えている分だけ描画する（Profiler、`memo`、`useMemo`、`useCallback`、`useDeferredValue`、`useTransition`、React Compiler、TanStack Virtual）
@@ -120,7 +120,7 @@ Claude はステップ完了時にここを更新する。
 
 - React 19 / TypeScript（strict）/ Vite
 - 状態管理ライブラリ・UIライブラリは入れない（素の React で練習する）
-  - 例外：応用ステップでは、そのステップで指定したライブラリだけ使ってよい（axe-core、TanStack Virtual、React Router、Zod、TanStack Query、Zustand、Playwright）
+  - 例外：応用ステップでは、そのステップで指定したライブラリだけ使ってよい（axe-core、react-error-boundary、TanStack Virtual、React Router、Zod、TanStack Query、Zustand、Playwright）
   - テスト用の MSW は Step 16-6 で導入済み
 - Linter / Formatter は Biome（`biome.json`）。ESLint / Prettier / Stylelint は使わない
 
