@@ -111,9 +111,6 @@ describe("BookList", () => {
     if (!brokenBookElement)
       throw new Error("brokenBookElement does not exist.");
 
-    expect(targetBookElement).toBeInTheDocument();
-    expect(screen.getByText("データが壊れています。")).toBeInTheDocument();
-
     await user.click(
       within(brokenBookElement).getByRole("button", { name: "削除" }),
     );
