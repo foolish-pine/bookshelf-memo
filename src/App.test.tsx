@@ -76,10 +76,9 @@ const showDeleteModalElement = async (
   return deleteModalElement;
 };
 
-const writeFromOtherTab = (books: Book[]) => {
+const writeFromOtherTab = (newValue: string) => {
   const key = LOCAL_STORAGE_BOOKS_KEY;
   const oldValue = localStorage.getItem(key);
-  const newValue = JSON.stringify(books);
 
   act(() => {
     localStorage.setItem(key, newValue);
@@ -536,7 +535,7 @@ describe("App", () => {
         within(bookListSectionElement).queryByText("別タブの本"),
       ).not.toBeInTheDocument();
 
-      writeFromOtherTab([createBook({ title: "別タブの本" })]);
+      writeFromOtherTab(JSON.stringify([createBook({ title: "別タブの本" })]));
 
       expect(
         within(bookListSectionElement).getByText("別タブの本"),
@@ -560,7 +559,7 @@ describe("App", () => {
         anotherBook.title,
       );
 
-      writeFromOtherTab([anotherBook]);
+      writeFromOtherTab(JSON.stringify([anotherBook]));
 
       expect(targetBookElement).not.toBeInTheDocument();
       expect(anotherBookElement).toBeInTheDocument();
@@ -570,24 +569,17 @@ describe("App", () => {
       const validBook = createBook();
       setupBooksInLocalStorage([validBook]);
 
-      const key = LOCAL_STORAGE_BOOKS_KEY;
-      const newValue = "not a JSON string";
-
       renderApp();
 
       const bookListSectionElement = getBookListSectionElement();
+      const validBookElement = getTargetBookElement(
+        bookListSectionElement,
+        validBook.title,
+      );
 
-      act(() => {
-        localStorage.setItem(key, newValue);
-        window.dispatchEvent(
-          new StorageEvent("storage", {
-            key: LOCAL_STORAGE_BOOKS_KEY,
-            oldValue: JSON.stringify([validBook]),
-            newValue,
-            storageArea: localStorage,
-          }),
-        );
-      });
+      expect(validBookElement).toBeInTheDocument();
+
+      writeFromOtherTab("not a JSON string");
 
       expect(
         within(bookListSectionElement).getByText("本がありません。"),
@@ -598,24 +590,17 @@ describe("App", () => {
       const validBook = createBook();
       setupBooksInLocalStorage([validBook]);
 
-      const key = LOCAL_STORAGE_BOOKS_KEY;
-      const newValue = JSON.stringify([{}]);
-
       renderApp();
 
       const bookListSectionElement = getBookListSectionElement();
+      const validBookElement = getTargetBookElement(
+        bookListSectionElement,
+        validBook.title,
+      );
 
-      act(() => {
-        localStorage.setItem(key, newValue);
-        window.dispatchEvent(
-          new StorageEvent("storage", {
-            key: LOCAL_STORAGE_BOOKS_KEY,
-            oldValue: JSON.stringify([validBook]),
-            newValue,
-            storageArea: localStorage,
-          }),
-        );
-      });
+      expect(validBookElement).toBeInTheDocument();
+
+      writeFromOtherTab(JSON.stringify([{}]));
 
       expect(
         within(bookListSectionElement).getByText("本がありません。"),
