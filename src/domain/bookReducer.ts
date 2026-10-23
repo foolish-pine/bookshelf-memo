@@ -1,6 +1,6 @@
 import { type Book, type BookRatingNumber, nextBookStatus } from "./book";
 
-export type Action =
+export type BookAction =
   | {
       type: "add_book";
       id: string;
@@ -27,7 +27,10 @@ export type Action =
       newRating: BookRatingNumber;
     };
 
-export function bookReducer(state: readonly Book[], action: Action): Book[] {
+export function bookReducer(
+  state: readonly Book[],
+  action: BookAction,
+): Book[] {
   const type = action.type;
   switch (type) {
     case "add_book":

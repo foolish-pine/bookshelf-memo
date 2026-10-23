@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import axe from "axe-core";
 import App from "./App.tsx";
@@ -76,7 +76,26 @@ const showDeleteModalElement = async (
   return deleteModalElement;
 };
 
+const writeFromOtherTab = (books: Book[]) => {
+  const key = LOCAL_STORAGE_BOOKS_KEY;
+  const oldValue = localStorage.getItem(key);
+  const newValue = JSON.stringify(books);
+
+  act(() => {
+    localStorage.setItem(key, newValue);
+    window.dispatchEvent(
+      new StorageEvent("storage", {
+        key,
+        oldValue,
+        newValue,
+        storageArea: localStorage,
+      }),
+    );
+  });
+};
+
 afterEach(() => {
+  vi.unstubAllGlobals();
   localStorage.clear();
 });
 
@@ -504,6 +523,122 @@ describe("App", () => {
     expect(
       within(anotherBookElement).getByText("評価: 未評価"),
     ).toBeInTheDocument();
+  });
+
+  describe("BooksProvider のタブ間同期", () => {
+    it("別タブで本が追加されると表示に反映される", async () => {
+      setupBooksInLocalStorage([createBook()]);
+      renderApp();
+
+      const bookListSectionElement = getBookListSectionElement();
+
+      expect(
+        within(bookListSectionElement).queryByText("別タブの本"),
+      ).not.toBeInTheDocument();
+
+      writeFromOtherTab([createBook({ title: "別タブの本" })]);
+
+      expect(
+        within(bookListSectionElement).getByText("別タブの本"),
+      ).toBeInTheDocument();
+    });
+
+    it("別タブで本が削除されると表示から消える", async () => {
+      const targetBook = createBook();
+      const anotherBook = createBook();
+      setupBooksInLocalStorage([targetBook, anotherBook]);
+
+      renderApp();
+
+      const bookListSectionElement = getBookListSectionElement();
+      const targetBookElement = getTargetBookElement(
+        bookListSectionElement,
+        targetBook.title,
+      );
+      const anotherBookElement = getTargetBookElement(
+        bookListSectionElement,
+        anotherBook.title,
+      );
+
+      writeFromOtherTab([anotherBook]);
+
+      expect(targetBookElement).not.toBeInTheDocument();
+      expect(anotherBookElement).toBeInTheDocument();
+    });
+
+    it("別タブで保存された文字列が JSON にパースできない値のとき、一覧を表示しない", async () => {
+      const validBook = createBook();
+      setupBooksInLocalStorage([validBook]);
+
+      const key = LOCAL_STORAGE_BOOKS_KEY;
+      const newValue = "not a JSON string";
+
+      renderApp();
+
+      const bookListSectionElement = getBookListSectionElement();
+
+      act(() => {
+        localStorage.setItem(key, newValue);
+        window.dispatchEvent(
+          new StorageEvent("storage", {
+            key: LOCAL_STORAGE_BOOKS_KEY,
+            oldValue: JSON.stringify([validBook]),
+            newValue,
+            storageArea: localStorage,
+          }),
+        );
+      });
+
+      expect(
+        within(bookListSectionElement).getByText("本がありません。"),
+      ).toBeInTheDocument();
+    });
+
+    it("別タブで保存された文字列が JSON にパースできるがバリデーションをパスしない値のとき、一覧を表示しない", async () => {
+      const validBook = createBook();
+      setupBooksInLocalStorage([validBook]);
+
+      const key = LOCAL_STORAGE_BOOKS_KEY;
+      const newValue = JSON.stringify([{}]);
+
+      renderApp();
+
+      const bookListSectionElement = getBookListSectionElement();
+
+      act(() => {
+        localStorage.setItem(key, newValue);
+        window.dispatchEvent(
+          new StorageEvent("storage", {
+            key: LOCAL_STORAGE_BOOKS_KEY,
+            oldValue: JSON.stringify([validBook]),
+            newValue,
+            storageArea: localStorage,
+          }),
+        );
+      });
+
+      expect(
+        within(bookListSectionElement).getByText("本がありません。"),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("localStorage.getItem() が例外を投げたとき、一覧を表示しない", () => {
+    setupBooksInLocalStorage([createBook()]);
+
+    const getItem = vi.fn(() => {
+      throw new DOMException("The operation is insecure.", "SecurityError");
+    });
+    vi.stubGlobal("localStorage", { getItem });
+
+    renderApp();
+
+    const bookListSectionElement = getBookListSectionElement();
+
+    expect(
+      within(bookListSectionElement).getByText("本がありません。"),
+    ).toBeInTheDocument();
+    expect(getItem).toHaveBeenCalledWith(LOCAL_STORAGE_BOOKS_KEY);
   });
 
   describe("タイトル検索機能", () => {

@@ -1,9 +1,15 @@
-import { createContext, type ReactNode, use, useReducer } from "react";
+import {
+  createContext,
+  type ReactNode,
+  use,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { type Book, type BookRatingNumber, isBooks } from "../domain/book";
-import { bookReducer } from "../domain/bookReducer";
-import { useSaveToLocalStorage } from "../hooks/useSaveToLocalStorage";
+import { type BookAction, bookReducer } from "../domain/bookReducer";
 import { LOCAL_STORAGE_BOOKS_KEY } from "../storage";
-import { loadFromLocalStorage } from "../utils/loadFromLocalStorage";
+
+const LOCAL_EVENT = "bookshelf-memo:local-storage";
 
 type BooksContextValue = {
   books: Book[];
@@ -22,13 +28,48 @@ type BooksContextValue = {
   toggleRating: (id: string, newRating: BookRatingNumber) => void;
 };
 
+const subscribe = (callback: () => void) => {
+  window.addEventListener("storage", callback);
+  window.addEventListener(LOCAL_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(LOCAL_EVENT, callback);
+  };
+};
+
+const getSnapshot = () => {
+  try {
+    return localStorage.getItem(LOCAL_STORAGE_BOOKS_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const parseBooks = (raw: string | null): Book[] => {
+  if (raw === null) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+
+    return isBooks(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 const BooksContext = createContext<BooksContextValue | null>(null);
 
 export function BooksProvider({ children }: { children: ReactNode }) {
-  const [books, dispatch] = useReducer(bookReducer, [], () =>
-    loadFromLocalStorage(LOCAL_STORAGE_BOOKS_KEY, [], isBooks),
-  );
-  useSaveToLocalStorage(LOCAL_STORAGE_BOOKS_KEY, books);
+  const raw = useSyncExternalStore(subscribe, getSnapshot, () => null);
+  const books = useMemo(() => parseBooks(raw), [raw]);
+
+  const dispatch = (action: BookAction) => {
+    const current = parseBooks(getSnapshot());
+    const next = bookReducer(current, action);
+
+    localStorage.setItem(LOCAL_STORAGE_BOOKS_KEY, JSON.stringify(next));
+
+    window.dispatchEvent(new Event(LOCAL_EVENT));
+  };
 
   const addBook = ({ title, author }: { title: string; author: string }) => {
     dispatch({ type: "add_book", id: crypto.randomUUID(), title, author });
